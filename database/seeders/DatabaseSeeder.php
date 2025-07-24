@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
         // Seed reference data first
         $this->call([
             ReferenceDataSeeder::class,
+            UserRoleSeeder::class,
         ]);
 
         // User::factory(10)->create();
