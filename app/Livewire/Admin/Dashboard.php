@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 
-#[Layout('layouts.app')]
+#[Layout('layouts.admin')]
 class Dashboard extends Component
 {
     public $systemHealth = [];

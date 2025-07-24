@@ -40,6 +40,25 @@ Route::get('/test-profile', function () {
     ];
 })->middleware('auth')->name('test.profile');
 
+// Test route for admin navigation
+Route::get('/test-admin-nav', function () {
+    if (!auth()->check()) {
+        return 'User not logged in - please login first';
+    }
+    
+    $user = auth()->user();
+    $isAdmin = $user->role && $user->role->name === 'Admin';
+    
+    return [
+        'user_name' => $user->full_name,
+        'user_role' => $user->role?->name ?? 'No Role',
+        'is_admin' => $isAdmin,
+        'admin_dashboard_url' => route('admin.dashboard'),
+        'can_access_admin' => $isAdmin ? 'Yes' : 'No',
+        'message' => $isAdmin ? 'Admin navigation should work!' : 'Access denied - not an admin'
+    ];
+})->middleware('auth')->name('test.admin.nav');
+
 // Protected Routes (require auth)
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::view('/dashboard', 'dashboard')->name('dashboard');
