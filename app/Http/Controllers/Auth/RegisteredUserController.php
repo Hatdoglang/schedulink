@@ -45,6 +45,8 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return redirect(route('dashboard', absolute: false));
+        // Use role-based redirection
+        $redirectUrl = \App\Services\RoleRedirectService::getRedirectUrl();
+        return redirect($redirectUrl);
     }
 }

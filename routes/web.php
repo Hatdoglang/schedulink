@@ -32,6 +32,31 @@ Route::get('/debug-role', function () {
     ];
 })->middleware('auth')->name('debug.role');
 
+// ✅ Test admin access
+Route::get('/test-admin-access', function () {
+    if (!auth()->check()) {
+        return redirect('/login');
+    }
+
+    $user = auth()->user();
+    $role = $user->role;
+    
+    if (!$role || $role->name !== 'Admin') {
+        return [
+            'error' => 'Access denied. Admin role required.',
+            'user_role' => $role?->name ?? 'No role assigned',
+            'user_id' => $user->id,
+        ];
+    }
+
+    return [
+        'success' => 'Admin access confirmed!',
+        'user_role' => $role->name,
+        'user_id' => $user->id,
+        'admin_dashboard_url' => '/admin/dashboard',
+    ];
+})->middleware('auth')->name('test.admin');
+
 // ✅ Test profile route (requires login)
 Route::get('/test-profile', function () {
     if (!auth()->check()) {
@@ -48,7 +73,12 @@ Route::get('/test-profile', function () {
 
 // ✅ Authenticated and verified routes
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::view('/dashboard', 'dashboard')->name('dashboard');
+    // Fallback dashboard for users without specific roles
+    Route::get('/dashboard', function () {
+        $redirectUrl = \App\Services\RoleRedirectService::getRedirectUrl();
+        return redirect($redirectUrl);
+    })->name('dashboard');
+    
     Route::view('/profile', 'profile')->name('profile');
 
     // Profile management

@@ -27,12 +27,22 @@ class Login extends Component
         // Redirect based on user role
         $redirectUrl = \App\Services\RoleRedirectService::getRedirectUrl();
 
-        // Log the redirection for debugging
-        Log::info('User login successful', [
+        // Enhanced logging for debugging
+        Log::info('Livewire login successful', [
             'user_id' => $user->id,
             'user_email' => $user->email,
+            'user_name' => $user->full_name ?? 'N/A',
+            'role_id' => $role?->id,
             'role_name' => $role?->name,
-            'redirect_url' => $redirectUrl
+            'redirect_url' => $redirectUrl,
+            'is_admin' => $role?->name === 'Admin',
+            'session_id' => session()->getId()
+        ]);
+
+        // Log before redirect
+        Log::info('About to redirect', [
+            'redirect_url' => $redirectUrl,
+            'user_role' => $role?->name
         ]);
 
         $this->redirectIntended(default: $redirectUrl, navigate: true);

@@ -14,21 +14,44 @@ class RoleRedirectService
     {
         $user = Auth::user();
 
-        if (!$user || !$user->role) {
-            Log::warning('User has no role assigned', ['user_id' => $user?->id]);
+        if (!$user) {
+            Log::warning('No authenticated user found');
+            return '/dashboard'; // Default fallback
+        }
+
+        if (!$user->role) {
+            Log::warning('User has no role assigned', [
+                'user_id' => $user->id,
+                'user_email' => $user->email,
+                'user_name' => $user->full_name ?? 'N/A'
+            ]);
             return '/dashboard'; // Default fallback
         }
 
         $roleName = $user->role->name;
-        Log::info('User login redirect', ['user_id' => $user->id, 'role' => $roleName]);
+        Log::info('User login redirect', [
+            'user_id' => $user->id,
+            'user_email' => $user->email,
+            'user_name' => $user->full_name ?? 'N/A',
+            'role_id' => $user->role->id,
+            'role' => $roleName
+        ]);
 
-        return match ($roleName) {
+        $redirectUrl = match ($roleName) {
             'Admin' => '/admin/dashboard',
             'Manager' => '/approver/dashboard',
             'Driver' => '/requester/dashboard',
             'User' => '/requester/dashboard',
             default => '/dashboard'
         };
+
+        Log::info('Redirect URL determined', [
+            'user_id' => $user->id,
+            'role' => $roleName,
+            'redirect_url' => $redirectUrl
+        ]);
+
+        return $redirectUrl;
     }
 
     /**
