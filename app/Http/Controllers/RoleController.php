@@ -2,63 +2,121 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Role;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Validation\Rule;
 
 class RoleController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(): JsonResponse
     {
-        //
+        $roles = Role::with('users')->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $roles,
+        ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function create(): JsonResponse
     {
-        //
+        $availableRoles = ['Admin', 'Manager', 'User', 'Driver'];
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'available_roles' => $availableRoles,
+            ],
+        ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
-        //
+        try {
+            $validated = $request->validate([
+                'name' => ['required', 'string', Rule::in(['Admin', 'Manager', 'User', 'Driver']), 'unique:roles,name'],
+            ]);
+
+            $role = Role::create($validated);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Role created successfully',
+                'data' => $role,
+            ], 201);
+
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        }
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function show(Role $role): JsonResponse
     {
-        //
+        $role->load('users');
+
+        return response()->json([
+            'success' => true,
+            'data' => $role,
+        ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function edit(Role $role): JsonResponse
     {
-        //
+        $availableRoles = ['Admin', 'Manager', 'User', 'Driver'];
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'role' => $role,
+                'available_roles' => $availableRoles,
+            ],
+        ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Role $role): JsonResponse
     {
-        //
+        try {
+            $validated = $request->validate([
+                'name' => ['required', 'string', Rule::in(['Admin', 'Manager', 'User', 'Driver']), 'unique:roles,name,' . $role->id],
+            ]);
+
+            $role->update($validated);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Role updated successfully',
+                'data' => $role,
+            ]);
+
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy(Role $role): JsonResponse
     {
-        //
+        if ($role->users()->count() > 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot delete role with associated users',
+            ], 422);
+        }
+
+        $role->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Role deleted successfully',
+        ]);
     }
 }

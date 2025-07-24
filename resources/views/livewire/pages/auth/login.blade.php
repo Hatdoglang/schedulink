@@ -1,10 +1,10 @@
 <div class="d-flex flex-column align-items-center justify-content-center text-center">
     <!-- Logo -->
     <div class="mb-3">
-        <img src="{{ asset('images/gmall.png') }}" alt="Logo" style="height: 60px;">
+        <img src="{{ asset('images/gmall.png') }}" alt="Logo" style="height: 25px;">
     </div>
 
-    <h3 class="mb-4">Login</h3>
+    <h3 class="mb-4"><strong>Login</strong> </h3>
 
     <x-auth-session-status class="mb-3" :status="session('status')" />
 

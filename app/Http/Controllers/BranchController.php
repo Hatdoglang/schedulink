@@ -2,63 +2,111 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Branch;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Validation\ValidationException;
 
 class BranchController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(): JsonResponse
     {
-        //
+        $branches = Branch::with('users')->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $branches,
+        ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        return response()->json([
+            'success' => true,
+            'message' => 'Create form data',
+        ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
-        //
+        try {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255|unique:branches,name',
+            ]);
+
+            $branch = Branch::create($validated);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Branch created successfully',
+                'data' => $branch,
+            ], 201);
+
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        }
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function show(Branch $branch): JsonResponse
     {
-        //
+        $branch->load('users');
+
+        return response()->json([
+            'success' => true,
+            'data' => $branch,
+        ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function edit(Branch $branch): JsonResponse
     {
-        //
+        return response()->json([
+            'success' => true,
+            'data' => $branch,
+        ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Branch $branch): JsonResponse
     {
-        //
+        try {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255|unique:branches,name,' . $branch->id,
+            ]);
+
+            $branch->update($validated);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Branch updated successfully',
+                'data' => $branch,
+            ]);
+
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy(Branch $branch): JsonResponse
     {
-        //
+        if ($branch->users()->count() > 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot delete branch with associated users',
+            ], 422);
+        }
+
+        $branch->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Branch deleted successfully',
+        ]);
     }
 }

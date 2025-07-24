@@ -11,7 +11,7 @@ use Livewire\Component;
 use Livewire\Attributes\Layout;
 
 #[Layout('layouts.guest')]
-class Register extends Component
+class register extends Component
 {
     public string $name = '';
     public string $email = '';
