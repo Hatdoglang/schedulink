@@ -95,7 +95,12 @@ class RoleRedirectService
                 ['name' => 'Approval History', 'url' => '/approver/approvals/my-history', 'icon' => 'fas fa-history'],
                 ['name' => 'My Bookings', 'url' => '/requester/my-dashboard', 'icon' => 'fas fa-calendar'],
             ],
-            'Driver', 'User' => [
+            'Driver' => [
+                ['name' => 'My Dashboard', 'url' => '/requester/my-dashboard', 'icon' => 'fas fa-tachometer-alt'],
+                ['name' => 'My Bookings', 'url' => '/requester/bookings', 'icon' => 'fas fa-calendar'],
+                ['name' => 'New Booking', 'url' => '/requester/bookings/create', 'icon' => 'fas fa-plus'],
+            ],
+            'User' => [
                 ['name' => 'My Dashboard', 'url' => '/requester/my-dashboard', 'icon' => 'fas fa-tachometer-alt'],
                 ['name' => 'My Bookings', 'url' => '/requester/bookings', 'icon' => 'fas fa-calendar'],
                 ['name' => 'New Booking', 'url' => '/requester/bookings/create', 'icon' => 'fas fa-plus'],
