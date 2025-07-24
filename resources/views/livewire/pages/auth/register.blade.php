@@ -1,4 +1,41 @@
 <div class="d-flex flex-column align-items-center justify-content-center text-center">
+    @push('styles')
+    <style>
+    .card-header h6 {
+        font-weight: 600;
+    }
+
+    .form-select:focus,
+    .form-control:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .card {
+        border: none;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+    }
+
+    .card-header {
+        border-radius: 10px 10px 0 0 !important;
+    }
+    </style>
+    @endpush
+
     <!-- Logo -->
     <div class="mb-3">
         <img src="{{ asset('images/gmall.png') }}" alt="Logo" style="height: 60px;">
@@ -182,38 +219,3 @@
         </p>
     </div>
 </div>
-
-<style>
-.card-header h6 {
-    font-weight: 600;
-}
-
-.form-select:focus,
-.form-control:focus {
-    border-color: #0d6efd;
-    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
-}
-
-.btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border: none;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-}
-
-.btn-primary:hover {
-    background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.card {
-    border: none;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
-}
-
-.card-header {
-    border-radius: 10px 10px 0 0 !important;
-}
-</style>
