@@ -48,6 +48,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'role:Ad
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
     Route::get('/analytics', [AdminDashboardController::class, 'analytics'])->name('analytics');
     
+    // Livewire Dashboard
+    Route::get('/livewire-dashboard', App\Livewire\Admin\Dashboard::class)->name('livewire.dashboard');
+    
     // User Management
     Route::prefix('users')->name('users.')->group(function () {
         Route::get('/', [UserManagementController::class, 'index'])->name('index');
@@ -89,6 +92,9 @@ Route::prefix('approver')->name('approver.')->middleware(['auth', 'verified', 'r
     // Dashboard
     Route::get('/dashboard', [ApproverDashboardController::class, 'index'])->name('dashboard');
     Route::get('/approval-stats', [ApproverDashboardController::class, 'getApprovalStats'])->name('approval-stats');
+    
+    // Livewire Dashboard
+    Route::get('/livewire-dashboard', App\Livewire\Approver\Dashboard::class)->name('livewire.dashboard');
     
     // Approval Management
     Route::prefix('approvals')->name('approvals.')->group(function () {

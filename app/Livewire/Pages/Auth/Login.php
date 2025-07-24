@@ -18,7 +18,9 @@ class Login extends Component
         $this->form->authenticate();
         Session::regenerate();
 
-        $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
+        // Redirect based on user role
+        $redirectUrl = \App\Services\RoleRedirectService::getRedirectUrl();
+        $this->redirectIntended(default: $redirectUrl, navigate: true);
     }
 
     public function render()

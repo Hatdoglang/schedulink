@@ -76,7 +76,9 @@ class Register extends Component
 
         Auth::login($user);
 
-        $this->redirect(route('dashboard', absolute: false), navigate: true);
+        // Redirect based on user role
+        $redirectUrl = \App\Services\RoleRedirectService::getRedirectUrl();
+        $this->redirect($redirectUrl, navigate: true);
     }
 
     public function render()
