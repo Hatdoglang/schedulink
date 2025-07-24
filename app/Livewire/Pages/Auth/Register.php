@@ -18,8 +18,7 @@ use Livewire\Attributes\Layout;
 #[Layout('layouts.guest')]
 class Register extends Component
 {
-    public string $first_name = '';
-    public string $last_name = '';
+    public string $full_name = '';
     public string $email = '';
     public string $password = '';
     public string $password_confirmation = '';
@@ -42,8 +41,7 @@ class Register extends Component
     public function register(): void
     {
         $validated = $this->validate([
-            'first_name' => ['required', 'string', 'max:255'],
-            'last_name' => ['required', 'string', 'max:255'],
+            'full_name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
             'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
             'mobile_number' => ['required', 'string', 'max:15'],
@@ -54,10 +52,27 @@ class Register extends Component
             'role_id' => ['required', 'exists:roles,id'],
         ]);
 
-        $validated['password'] = Hash::make($validated['password']);
-        $validated['is_active'] = true; // Set as active by default
+        // Split full name into first and last name
+        $nameParts = explode(' ', trim($validated['full_name']), 2);
+        $firstName = $nameParts[0];
+        $lastName = isset($nameParts[1]) ? $nameParts[1] : '';
 
-        event(new Registered($user = User::create($validated)));
+        // Prepare data for user creation
+        $userData = [
+            'first_name' => $firstName,
+            'last_name' => $lastName,
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            'mobile_number' => $validated['mobile_number'],
+            'business_unit_id' => $validated['business_unit_id'],
+            'company_code_id' => $validated['company_code_id'],
+            'branch_id' => $validated['branch_id'],
+            'department_id' => $validated['department_id'],
+            'role_id' => $validated['role_id'],
+            'is_active' => true, // Set as active by default
+        ];
+
+        event(new Registered($user = User::create($userData)));
 
         Auth::login($user);
 

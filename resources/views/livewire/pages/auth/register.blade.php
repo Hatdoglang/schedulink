@@ -63,18 +63,11 @@
             <x-input-error :messages="$errors->get('department_id')" class="mt-2" />
         </div>
 
-        <!-- First Name -->
+        <!-- Full Name -->
         <div class="mb-3 text-start">
-            <x-input-label for="first_name" :value="__('First Name')" />
-            <x-text-input wire:model="first_name" id="first_name" class="form-control" type="text" required autofocus autocomplete="given-name" />
-            <x-input-error :messages="$errors->get('first_name')" class="mt-2" />
-        </div>
-
-        <!-- Last Name -->
-        <div class="mb-3 text-start">
-            <x-input-label for="last_name" :value="__('Last Name')" />
-            <x-text-input wire:model="last_name" id="last_name" class="form-control" type="text" required autocomplete="family-name" />
-            <x-input-error :messages="$errors->get('last_name')" class="mt-2" />
+            <x-input-label for="full_name" :value="__('Full Name')" />
+            <x-text-input wire:model="full_name" id="full_name" class="form-control" type="text" required autofocus autocomplete="name" placeholder="Enter your full name" />
+            <x-input-error :messages="$errors->get('full_name')" class="mt-2" />
         </div>
 
         <!-- Email -->
