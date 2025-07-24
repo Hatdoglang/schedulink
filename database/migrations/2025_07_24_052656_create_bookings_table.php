@@ -13,6 +13,17 @@ return new class extends Migration
     {
         Schema::create('bookings', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('asset_type_id')->constrained('asset_types');
+            $table->foreignId('asset_detail_id')->constrained('asset_details');
+            $table->foreignId('user_id')->constrained('users');
+            $table->text('purpose');
+            $table->integer('no_of_seats');
+            $table->text('destination');
+            $table->date('scheduled_date');
+            $table->time('time_from');
+            $table->time('time_to');
+            $table->text('notes')->nullable();
+            $table->enum('status', ['pending', 'approved', 'declined', 'cancelled']);
             $table->timestamps();
         });
     }

@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('drivers', function (Blueprint $table) {
             $table->id();
+            $table->string('name');
+            $table->boolean('is_active');
             $table->timestamps();
         });
     }

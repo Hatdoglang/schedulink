@@ -13,6 +13,11 @@ return new class extends Migration
     {
         Schema::create('approval_logs', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('booking_id')->constrained('bookings');
+            $table->foreignId('approver_id')->constrained('approvers');
+            $table->enum('status', ['pending', 'approved', 'declined']);
+            $table->text('remarks')->nullable();
+            $table->timestamp('approved_at')->nullable();
             $table->timestamps();
         });
     }
