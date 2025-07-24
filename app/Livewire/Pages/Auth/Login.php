@@ -18,8 +18,21 @@ class Login extends Component
         $this->form->authenticate();
         Session::regenerate();
 
+        // Get user info for debugging
+        $user = auth()->user();
+        $role = $user->role;
+        
         // Redirect based on user role
         $redirectUrl = \App\Services\RoleRedirectService::getRedirectUrl();
+        
+        // Log the redirection for debugging
+        \Log::info('User login successful', [
+            'user_id' => $user->id,
+            'user_email' => $user->email,
+            'role_name' => $role?->name,
+            'redirect_url' => $redirectUrl
+        ]);
+        
         $this->redirectIntended(default: $redirectUrl, navigate: true);
     }
 

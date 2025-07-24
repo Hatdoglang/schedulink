@@ -21,8 +21,8 @@ use App\Http\Controllers\Approver\ApprovalController;
 // Requester Routes
 Route::prefix('requester')->name('requester.')->middleware(['auth', 'verified'])->group(function () {
     
-    // Dashboard
-    Route::get('/dashboard', [RequesterDashboardController::class, 'index'])->name('dashboard');
+    // Dashboard - Use Livewire component for web interface
+    Route::get('/dashboard', App\Livewire\Requester\Dashboard::class)->name('dashboard');
     
     // Bookings Management
     Route::prefix('bookings')->name('bookings.')->group(function () {
@@ -44,8 +44,8 @@ Route::prefix('requester')->name('requester.')->middleware(['auth', 'verified'])
 // Admin Routes
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'role:Admin'])->group(function () {
     
-    // Dashboard
-    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+    // Dashboard - Use Livewire component for web interface
+    Route::get('/dashboard', App\Livewire\Admin\Dashboard::class)->name('dashboard');
     Route::get('/analytics', [AdminDashboardController::class, 'analytics'])->name('analytics');
     
     // Livewire Dashboard
@@ -89,8 +89,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'role:Ad
 // Approver Routes
 Route::prefix('approver')->name('approver.')->middleware(['auth', 'verified', 'role:Manager,Admin'])->group(function () {
     
-    // Dashboard
-    Route::get('/dashboard', [ApproverDashboardController::class, 'index'])->name('dashboard');
+    // Dashboard - Use Livewire component for web interface
+    Route::get('/dashboard', App\Livewire\Approver\Dashboard::class)->name('dashboard');
     Route::get('/approval-stats', [ApproverDashboardController::class, 'getApprovalStats'])->name('approval-stats');
     
     // Livewire Dashboard

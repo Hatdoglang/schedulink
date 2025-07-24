@@ -14,16 +14,18 @@ class RoleRedirectService
         $user = Auth::user();
         
         if (!$user || !$user->role) {
+            \Log::warning('User has no role assigned', ['user_id' => $user?->id]);
             return '/dashboard'; // Default fallback
         }
 
         $roleName = $user->role->name;
+        \Log::info('User login redirect', ['user_id' => $user->id, 'role' => $roleName]);
 
         return match($roleName) {
-            'Admin' => '/admin/livewire-dashboard',
-            'Manager' => '/approver/livewire-dashboard', 
-            'Driver' => '/requester/my-dashboard',
-            'User' => '/requester/my-dashboard',
+            'Admin' => '/admin/dashboard',
+            'Manager' => '/approver/dashboard', 
+            'Driver' => '/requester/dashboard',
+            'User' => '/requester/dashboard',
             default => '/dashboard'
         };
     }
