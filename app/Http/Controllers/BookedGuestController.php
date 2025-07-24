@@ -13,7 +13,7 @@ class BookedGuestController extends Controller
     public function index(): JsonResponse
     {
         $bookedGuests = BookedGuest::with('booking.user')->get();
-
+        
         return response()->json([
             'success' => true,
             'data' => $bookedGuests,
@@ -23,7 +23,7 @@ class BookedGuestController extends Controller
     public function create(): JsonResponse
     {
         $bookings = Booking::with(['user', 'assetDetail'])->get();
-
+        
         return response()->json([
             'success' => true,
             'data' => [
@@ -82,7 +82,7 @@ class BookedGuestController extends Controller
     public function show(BookedGuest $bookedGuest): JsonResponse
     {
         $bookedGuest->load('booking.user');
-
+        
         return response()->json([
             'success' => true,
             'data' => $bookedGuest,
@@ -92,7 +92,7 @@ class BookedGuestController extends Controller
     public function edit(BookedGuest $bookedGuest): JsonResponse
     {
         $bookings = Booking::with(['user', 'assetDetail'])->get();
-
+        
         return response()->json([
             'success' => true,
             'data' => [
@@ -174,7 +174,7 @@ class BookedGuestController extends Controller
     public function getGuestsByBooking(Booking $booking): JsonResponse
     {
         $guests = $booking->bookedGuests;
-
+        
         return response()->json([
             'success' => true,
             'data' => $guests,

@@ -14,7 +14,7 @@ class AssetFileController extends Controller
     public function index(): JsonResponse
     {
         $assetFiles = AssetFile::with('assetDetail.assetType')->get();
-
+        
         return response()->json([
             'success' => true,
             'data' => $assetFiles,
@@ -24,7 +24,7 @@ class AssetFileController extends Controller
     public function create(): JsonResponse
     {
         $assetDetails = AssetDetail::with('assetType')->get();
-
+        
         return response()->json([
             'success' => true,
             'data' => [
@@ -46,7 +46,7 @@ class AssetFileController extends Controller
                 $file = $request->file('file');
                 $fileName = time() . '_' . $file->getClientOriginalName();
                 $filePath = $file->storeAs('asset_files', $fileName, 'public');
-
+                
                 $assetFile = AssetFile::create([
                     'asset_detail_id' => $validated['asset_detail_id'],
                     'file_attachments' => $filePath,
@@ -78,7 +78,7 @@ class AssetFileController extends Controller
     public function show(AssetFile $assetFile): JsonResponse
     {
         $assetFile->load('assetDetail.assetType');
-
+        
         return response()->json([
             'success' => true,
             'data' => $assetFile,
@@ -88,7 +88,7 @@ class AssetFileController extends Controller
     public function edit(AssetFile $assetFile): JsonResponse
     {
         $assetDetails = AssetDetail::with('assetType')->get();
-
+        
         return response()->json([
             'success' => true,
             'data' => [
@@ -120,7 +120,7 @@ class AssetFileController extends Controller
                 $file = $request->file('file');
                 $fileName = time() . '_' . $file->getClientOriginalName();
                 $filePath = $file->storeAs('asset_files', $fileName, 'public');
-
+                
                 $updateData['file_attachments'] = $filePath;
             }
 
@@ -178,7 +178,7 @@ class AssetFileController extends Controller
     public function getFilesByAssetDetail(AssetDetail $assetDetail): JsonResponse
     {
         $files = $assetDetail->assetFiles;
-
+        
         return response()->json([
             'success' => true,
             'data' => $files,
@@ -201,7 +201,7 @@ class AssetFileController extends Controller
             foreach ($request->file('files') as $file) {
                 $fileName = time() . '_' . $file->getClientOriginalName();
                 $filePath = $file->storeAs('asset_files', $fileName, 'public');
-
+                
                 $assetFile = AssetFile::create([
                     'asset_detail_id' => $assetDetail->id,
                     'file_attachments' => $filePath,

@@ -12,7 +12,7 @@ class BranchController extends Controller
     public function index(): JsonResponse
     {
         $branches = Branch::with('users')->get();
-
+        
         return response()->json([
             'success' => true,
             'data' => $branches,
@@ -54,7 +54,7 @@ class BranchController extends Controller
     public function show(Branch $branch): JsonResponse
     {
         $branch->load('users');
-
+        
         return response()->json([
             'success' => true,
             'data' => $branch,

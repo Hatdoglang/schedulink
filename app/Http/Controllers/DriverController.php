@@ -12,7 +12,7 @@ class DriverController extends Controller
     public function index(): JsonResponse
     {
         $drivers = Driver::with('vehicleDriverAssignments')->get();
-
+        
         return response()->json([
             'success' => true,
             'data' => $drivers,
@@ -57,7 +57,7 @@ class DriverController extends Controller
     public function show(Driver $driver): JsonResponse
     {
         $driver->load('vehicleDriverAssignments.booking');
-
+        
         return response()->json([
             'success' => true,
             'data' => $driver,
@@ -134,7 +134,7 @@ class DriverController extends Controller
     public function getActiveDrivers(): JsonResponse
     {
         $drivers = Driver::where('is_active', true)->get();
-
+        
         return response()->json([
             'success' => true,
             'data' => $drivers,

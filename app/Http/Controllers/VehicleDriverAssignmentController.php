@@ -21,7 +21,7 @@ class VehicleDriverAssignmentController extends Controller
             'assetDetail',
             'assignedBy'
         ])->orderBy('assigned_date', 'desc')->get();
-
+        
         return response()->json([
             'success' => true,
             'data' => $assignments,
@@ -36,7 +36,7 @@ class VehicleDriverAssignmentController extends Controller
         $drivers = Driver::where('is_active', true)->get();
         $assetDetails = AssetDetail::all();
         $users = User::where('is_active', true)->get();
-
+        
         return response()->json([
             'success' => true,
             'data' => [
@@ -114,7 +114,7 @@ class VehicleDriverAssignmentController extends Controller
             'assetDetail.assetType',
             'assignedBy'
         ]);
-
+        
         return response()->json([
             'success' => true,
             'data' => $vehicleDriverAssignment,
@@ -129,7 +129,7 @@ class VehicleDriverAssignmentController extends Controller
         $drivers = Driver::where('is_active', true)->get();
         $assetDetails = AssetDetail::all();
         $users = User::where('is_active', true)->get();
-
+        
         return response()->json([
             'success' => true,
             'data' => [

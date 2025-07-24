@@ -12,7 +12,7 @@ class DepartmentController extends Controller
     public function index(): JsonResponse
     {
         $departments = Department::with('users')->get();
-
+        
         return response()->json([
             'success' => true,
             'data' => $departments,
@@ -54,7 +54,7 @@ class DepartmentController extends Controller
     public function show(Department $department): JsonResponse
     {
         $department->load('users');
-
+        
         return response()->json([
             'success' => true,
             'data' => $department,

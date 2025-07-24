@@ -81,11 +81,11 @@ class BookingController extends Controller
                 ->where('status', '!=', 'cancelled')
                 ->where(function ($query) use ($validated) {
                     $query->whereBetween('time_from', [$validated['time_from'], $validated['time_to']])
-                        ->orWhereBetween('time_to', [$validated['time_from'], $validated['time_to']])
-                        ->orWhere(function ($q) use ($validated) {
-                            $q->where('time_from', '<=', $validated['time_from'])
+                          ->orWhereBetween('time_to', [$validated['time_from'], $validated['time_to']])
+                          ->orWhere(function ($q) use ($validated) {
+                              $q->where('time_from', '<=', $validated['time_from'])
                                 ->where('time_to', '>=', $validated['time_to']);
-                        });
+                          });
                 })
                 ->exists();
 
@@ -201,11 +201,11 @@ class BookingController extends Controller
                 ->where('id', '!=', $booking->id)
                 ->where(function ($query) use ($validated) {
                     $query->whereBetween('time_from', [$validated['time_from'], $validated['time_to']])
-                        ->orWhereBetween('time_to', [$validated['time_from'], $validated['time_to']])
-                        ->orWhere(function ($q) use ($validated) {
-                            $q->where('time_from', '<=', $validated['time_from'])
+                          ->orWhereBetween('time_to', [$validated['time_from'], $validated['time_to']])
+                          ->orWhere(function ($q) use ($validated) {
+                              $q->where('time_from', '<=', $validated['time_from'])
                                 ->where('time_to', '>=', $validated['time_to']);
-                        });
+                          });
                 })
                 ->exists();
 
@@ -308,11 +308,11 @@ class BookingController extends Controller
                 ->where('status', '!=', 'cancelled')
                 ->where(function ($query) use ($request) {
                     $query->whereBetween('time_from', [$request->time_from, $request->time_to])
-                        ->orWhereBetween('time_to', [$request->time_from, $request->time_to])
-                        ->orWhere(function ($q) use ($request) {
-                            $q->where('time_from', '<=', $request->time_from)
+                          ->orWhereBetween('time_to', [$request->time_from, $request->time_to])
+                          ->orWhere(function ($q) use ($request) {
+                              $q->where('time_from', '<=', $request->time_from)
                                 ->where('time_to', '>=', $request->time_to);
-                        });
+                          });
                 })
                 ->pluck('asset_detail_id');
 

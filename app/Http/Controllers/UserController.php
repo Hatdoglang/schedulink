@@ -24,7 +24,7 @@ class UserController extends Controller
             'companyCode',
             'role'
         ])->get();
-
+        
         return response()->json([
             'success' => true,
             'data' => $users,
@@ -38,7 +38,7 @@ class UserController extends Controller
         $businessUnits = BusinessUnit::all();
         $companyCodes = CompanyCode::all();
         $roles = Role::all();
-
+        
         return response()->json([
             'success' => true,
             'data' => [
@@ -100,7 +100,7 @@ class UserController extends Controller
             'bookings.assetDetail',
             'approvers.assetType'
         ]);
-
+        
         return response()->json([
             'success' => true,
             'data' => $user,
@@ -114,7 +114,7 @@ class UserController extends Controller
         $businessUnits = BusinessUnit::all();
         $companyCodes = CompanyCode::all();
         $roles = Role::all();
-
+        
         return response()->json([
             'success' => true,
             'data' => [

@@ -13,7 +13,7 @@ class RoleController extends Controller
     public function index(): JsonResponse
     {
         $roles = Role::with('users')->get();
-
+        
         return response()->json([
             'success' => true,
             'data' => $roles,
@@ -23,7 +23,7 @@ class RoleController extends Controller
     public function create(): JsonResponse
     {
         $availableRoles = ['Admin', 'Manager', 'User', 'Driver'];
-
+        
         return response()->json([
             'success' => true,
             'data' => [
@@ -59,7 +59,7 @@ class RoleController extends Controller
     public function show(Role $role): JsonResponse
     {
         $role->load('users');
-
+        
         return response()->json([
             'success' => true,
             'data' => $role,
@@ -69,7 +69,7 @@ class RoleController extends Controller
     public function edit(Role $role): JsonResponse
     {
         $availableRoles = ['Admin', 'Manager', 'User', 'Driver'];
-
+        
         return response()->json([
             'success' => true,
             'data' => [

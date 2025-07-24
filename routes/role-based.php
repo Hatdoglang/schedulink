@@ -20,10 +20,10 @@ use App\Http\Controllers\Approver\ApprovalController;
 
 // Requester Routes
 Route::prefix('requester')->name('requester.')->middleware(['auth', 'verified'])->group(function () {
-
+    
     // Dashboard
     Route::get('/dashboard', [RequesterDashboardController::class, 'index'])->name('dashboard');
-
+    
     // Bookings Management
     Route::prefix('bookings')->name('bookings.')->group(function () {
         Route::get('/', [RequesterBookingController::class, 'index'])->name('index');
@@ -36,21 +36,21 @@ Route::prefix('requester')->name('requester.')->middleware(['auth', 'verified'])
         Route::patch('/{id}/cancel', [RequesterBookingController::class, 'cancel'])->name('cancel');
         Route::get('/available-assets', [RequesterBookingController::class, 'getAvailableAssets'])->name('available-assets');
     });
-
+    
     // Livewire Routes
     Route::get('/my-dashboard', App\Livewire\Requester\Dashboard::class)->name('livewire.dashboard');
 });
 
 // Admin Routes
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'role:Admin'])->group(function () {
-
+    
     // Dashboard
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
     Route::get('/analytics', [AdminDashboardController::class, 'analytics'])->name('analytics');
-
+    
     // Livewire Dashboard
     Route::get('/livewire-dashboard', App\Livewire\Admin\Dashboard::class)->name('livewire.dashboard');
-
+    
     // User Management
     Route::prefix('users')->name('users.')->group(function () {
         Route::get('/', [UserManagementController::class, 'index'])->name('index');
@@ -63,24 +63,24 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'role:Ad
         Route::get('/reference-data', [UserManagementController::class, 'getReferenceData'])->name('reference-data');
         Route::patch('/bulk-update-status', [UserManagementController::class, 'bulkUpdateStatus'])->name('bulk-update-status');
     });
-
+    
     // Asset Management (using existing controllers)
     Route::resource('asset-types', App\Http\Controllers\AssetTypeController::class);
     Route::resource('asset-details', App\Http\Controllers\AssetDetailController::class);
-
+    
     // Booking Management (admin view of all bookings)
     Route::resource('bookings', App\Http\Controllers\BookingController::class);
-
+    
     // Reference Data Management
     Route::resource('business-units', App\Http\Controllers\BusinessUnitController::class);
     Route::resource('company-codes', App\Http\Controllers\CompanyCodeController::class);
     Route::resource('branches', App\Http\Controllers\BranchController::class);
     Route::resource('departments', App\Http\Controllers\DepartmentController::class);
     Route::resource('roles', App\Http\Controllers\RoleController::class);
-
+    
     // Approver Management
     Route::resource('approvers', App\Http\Controllers\ApproverController::class);
-
+    
     // Driver Management
     Route::resource('drivers', App\Http\Controllers\DriverController::class);
     Route::resource('vehicle-assignments', App\Http\Controllers\VehicleDriverAssignmentController::class);
@@ -88,14 +88,14 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'role:Ad
 
 // Approver Routes
 Route::prefix('approver')->name('approver.')->middleware(['auth', 'verified', 'role:Manager,Admin'])->group(function () {
-
+    
     // Dashboard
     Route::get('/dashboard', [ApproverDashboardController::class, 'index'])->name('dashboard');
     Route::get('/approval-stats', [ApproverDashboardController::class, 'getApprovalStats'])->name('approval-stats');
-
+    
     // Livewire Dashboard
     Route::get('/livewire-dashboard', App\Livewire\Approver\Dashboard::class)->name('livewire.dashboard');
-
+    
     // Approval Management
     Route::prefix('approvals')->name('approvals.')->group(function () {
         Route::get('/pending', [ApprovalController::class, 'getPendingApprovals'])->name('pending');
@@ -110,16 +110,16 @@ Route::prefix('approver')->name('approver.')->middleware(['auth', 'verified', 'r
 
 // Shared Routes (accessible by multiple roles)
 Route::middleware(['auth', 'verified'])->group(function () {
-
+    
     // Profile Management
-    // Route::resource('profile', App\Http\Controllers\ProfileController::class);
-
+    Route::resource('profile', App\Http\Controllers\ProfileController::class);
+    
     // Asset Files (for viewing/downloading)
     Route::resource('asset-files', App\Http\Controllers\AssetFileController::class);
-
+    
     // Booked Guests
     Route::resource('booked-guests', App\Http\Controllers\BookedGuestController::class);
-
+    
     // Approval Logs (read-only for tracking)
     Route::get('approval-logs', [App\Http\Controllers\ApprovalLogController::class, 'index'])->name('approval-logs.index');
     Route::get('approval-logs/{id}', [App\Http\Controllers\ApprovalLogController::class, 'show'])->name('approval-logs.show');
@@ -127,21 +127,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 // API Routes for AJAX/Frontend Integration
 Route::prefix('api')->name('api.')->middleware(['auth:sanctum'])->group(function () {
-
+    
     // Requester API
     Route::prefix('requester')->name('requester.')->group(function () {
         Route::get('/dashboard', [RequesterDashboardController::class, 'index']);
         Route::apiResource('bookings', RequesterBookingController::class);
         Route::get('/bookings/{id}/available-assets', [RequesterBookingController::class, 'getAvailableAssets']);
     });
-
+    
     // Admin API
     Route::prefix('admin')->name('admin.')->middleware(['role:Admin'])->group(function () {
         Route::get('/dashboard', [AdminDashboardController::class, 'index']);
         Route::get('/analytics', [AdminDashboardController::class, 'analytics']);
         Route::apiResource('users', UserManagementController::class);
     });
-
+    
     // Approver API
     Route::prefix('approver')->name('approver.')->middleware(['role:Manager,Admin'])->group(function () {
         Route::get('/dashboard', [ApproverDashboardController::class, 'index']);

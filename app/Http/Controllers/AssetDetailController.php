@@ -13,7 +13,7 @@ class AssetDetailController extends Controller
     public function index(): JsonResponse
     {
         $assetDetails = AssetDetail::with(['assetType', 'assetFiles'])->get();
-
+        
         return response()->json([
             'success' => true,
             'data' => $assetDetails,
@@ -23,7 +23,7 @@ class AssetDetailController extends Controller
     public function create(): JsonResponse
     {
         $assetTypes = AssetType::all();
-
+        
         return response()->json([
             'success' => true,
             'data' => [
@@ -67,7 +67,7 @@ class AssetDetailController extends Controller
     public function show(AssetDetail $assetDetail): JsonResponse
     {
         $assetDetail->load(['assetType', 'assetFiles', 'bookings.user', 'vehicleDriverAssignments.driver']);
-
+        
         return response()->json([
             'success' => true,
             'data' => $assetDetail,
@@ -77,7 +77,7 @@ class AssetDetailController extends Controller
     public function edit(AssetDetail $assetDetail): JsonResponse
     {
         $assetTypes = AssetType::all();
-
+        
         return response()->json([
             'success' => true,
             'data' => [

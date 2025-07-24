@@ -92,11 +92,11 @@ class User extends Authenticatable
     }
 
     /**
-     * Get the approval logs for the user.
+     * Get the vehicle driver assignments assigned by the user.
      */
-    public function approvalLogs(): HasMany
+    public function assignedVehicleDriverAssignments(): HasMany
     {
-        return $this->hasMany(ApprovalLog::class, 'approver_id');
+        return $this->hasMany(VehicleDriverAssignment::class, 'assigned_by');
     }
 
     /**
@@ -104,6 +104,6 @@ class User extends Authenticatable
      */
     public function getFullNameAttribute(): string
     {
-        return trim($this->first_name . ' ' . $this->last_name);
+        return $this->first_name . ' ' . $this->last_name;
     }
 }

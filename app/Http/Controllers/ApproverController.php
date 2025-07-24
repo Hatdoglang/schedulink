@@ -14,7 +14,7 @@ class ApproverController extends Controller
     public function index(): JsonResponse
     {
         $approvers = Approver::with(['assetType', 'user', 'approvalLogs'])->get();
-
+        
         return response()->json([
             'success' => true,
             'data' => $approvers,
@@ -25,7 +25,7 @@ class ApproverController extends Controller
     {
         $assetTypes = AssetType::all();
         $users = User::where('is_active', true)->with(['role'])->get();
-
+        
         return response()->json([
             'success' => true,
             'data' => [
@@ -98,7 +98,7 @@ class ApproverController extends Controller
     public function show(Approver $approver): JsonResponse
     {
         $approver->load(['assetType', 'user', 'approvalLogs.booking']);
-
+        
         return response()->json([
             'success' => true,
             'data' => $approver,
@@ -109,7 +109,7 @@ class ApproverController extends Controller
     {
         $assetTypes = AssetType::all();
         $users = User::where('is_active', true)->with(['role'])->get();
-
+        
         return response()->json([
             'success' => true,
             'data' => [
@@ -209,7 +209,7 @@ class ApproverController extends Controller
             ->with('user')
             ->orderBy('approver_level')
             ->get();
-
+        
         return response()->json([
             'success' => true,
             'data' => $approvers,
@@ -225,7 +225,7 @@ class ApproverController extends Controller
             ->with('assetType')
             ->orderBy('approver_level')
             ->get();
-
+        
         return response()->json([
             'success' => true,
             'data' => $approvers,
@@ -293,7 +293,7 @@ class ApproverController extends Controller
                     ],
                 ];
             });
-
+        
         return response()->json([
             'success' => true,
             'data' => [

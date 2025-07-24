@@ -64,9 +64,9 @@ class Dashboard extends Component
 
         // Booking trends (last 30 days)
         $this->bookingTrends = Booking::select(
-            DB::raw('DATE(created_at) as date'),
-            DB::raw('COUNT(*) as count')
-        )
+                DB::raw('DATE(created_at) as date'),
+                DB::raw('COUNT(*) as count')
+            )
             ->where('created_at', '>=', now()->subDays(30))
             ->groupBy('date')
             ->orderBy('date')
@@ -81,11 +81,9 @@ class Dashboard extends Component
         // Asset utilization by type
         $this->assetUtilization = AssetType::select('asset_types.name')
             ->withCount(['bookings as total_bookings'])
-            ->withCount([
-                'bookings as approved_bookings' => function ($query) {
-                    $query->where('status', 'approved');
-                }
-            ])
+            ->withCount(['bookings as approved_bookings' => function ($query) {
+                $query->where('status', 'approved');
+            }])
             ->get();
 
         // Upcoming bookings requiring attention

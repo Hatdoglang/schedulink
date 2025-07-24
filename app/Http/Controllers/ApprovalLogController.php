@@ -20,7 +20,7 @@ class ApprovalLogController extends Controller
             'booking.assetDetail',
             'approver.user'
         ])->orderBy('created_at', 'desc')->get();
-
+        
         return response()->json([
             'success' => true,
             'data' => $approvalLogs,
@@ -33,7 +33,7 @@ class ApprovalLogController extends Controller
             ->with(['user', 'assetDetail'])
             ->get();
         $approvers = Approver::with(['user', 'assetType'])->get();
-
+        
         return response()->json([
             'success' => true,
             'data' => [
@@ -135,7 +135,7 @@ class ApprovalLogController extends Controller
             'booking.assetDetail',
             'approver.user'
         ]);
-
+        
         return response()->json([
             'success' => true,
             'data' => $approvalLog,
@@ -146,7 +146,7 @@ class ApprovalLogController extends Controller
     {
         $bookings = Booking::with(['user', 'assetDetail'])->get();
         $approvers = Approver::with(['user', 'assetType'])->get();
-
+        
         return response()->json([
             'success' => true,
             'data' => [
@@ -253,7 +253,7 @@ class ApprovalLogController extends Controller
             ->with('approver.user')
             ->orderBy('created_at')
             ->get();
-
+        
         return response()->json([
             'success' => true,
             'data' => $logs,
@@ -269,7 +269,7 @@ class ApprovalLogController extends Controller
             ->with('booking.user')
             ->orderBy('created_at', 'desc')
             ->get();
-
+        
         return response()->json([
             'success' => true,
             'data' => $logs,
@@ -296,7 +296,7 @@ class ApprovalLogController extends Controller
             }
 
             $approver = Approver::find($validated['approver_id']);
-
+            
             // Check if approver is authorized for this asset type
             if ($approver->asset_type_id !== $booking->asset_type_id) {
                 return response()->json([
@@ -376,7 +376,7 @@ class ApprovalLogController extends Controller
             })
             ->with(['user', 'assetDetail'])
             ->get();
-
+        
         return response()->json([
             'success' => true,
             'data' => $pendingBookings,
@@ -398,7 +398,7 @@ class ApprovalLogController extends Controller
 
         // Check if any approver declined
         $hasDeclined = $approvalLogs->where('status', 'declined')->count() > 0;
-
+        
         if ($hasDeclined) {
             $booking->update(['status' => 'declined']);
             return;

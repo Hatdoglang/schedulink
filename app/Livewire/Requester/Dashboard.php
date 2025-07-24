@@ -22,7 +22,7 @@ class Dashboard extends Component
     public function loadDashboardData()
     {
         $userId = Auth::id();
-
+        
         // Get booking statistics for the current user
         $totalBookings = Booking::where('user_id', $userId)->count();
         $pendingBookings = Booking::where('user_id', $userId)->where('status', 'pending')->count();

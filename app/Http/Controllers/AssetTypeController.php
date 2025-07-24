@@ -12,7 +12,7 @@ class AssetTypeController extends Controller
     public function index(): JsonResponse
     {
         $assetTypes = AssetType::with(['assetDetails', 'approvers'])->get();
-
+        
         return response()->json([
             'success' => true,
             'data' => $assetTypes,
@@ -54,7 +54,7 @@ class AssetTypeController extends Controller
     public function show(AssetType $assetType): JsonResponse
     {
         $assetType->load(['assetDetails', 'bookings', 'approvers.user']);
-
+        
         return response()->json([
             'success' => true,
             'data' => $assetType,

@@ -54,7 +54,7 @@ class Dashboard extends Component
 
         // Statistics
         $pendingApprovalsCount = $this->pendingBookings->count();
-
+        
         $approvedToday = ApprovalLog::where('approver_user_id', $userId)
             ->where('status', 'approved')
             ->whereDate('created_at', now()->toDateString())

@@ -21,7 +21,7 @@ class BookingController extends Controller
             'bookedGuests',
             'approvalLogs.approver.user'
         ])->orderBy('created_at', 'desc')->get();
-
+        
         return response()->json([
             'success' => true,
             'data' => $bookings,
@@ -32,7 +32,7 @@ class BookingController extends Controller
     {
         $assetTypes = AssetType::all();
         $assetDetails = AssetDetail::with('assetType')->get();
-
+        
         return response()->json([
             'success' => true,
             'data' => [
@@ -66,11 +66,11 @@ class BookingController extends Controller
                 ->where('status', '!=', 'cancelled')
                 ->where(function ($query) use ($validated) {
                     $query->whereBetween('time_from', [$validated['time_from'], $validated['time_to']])
-                        ->orWhereBetween('time_to', [$validated['time_from'], $validated['time_to']])
-                        ->orWhere(function ($q) use ($validated) {
-                            $q->where('time_from', '<=', $validated['time_from'])
+                          ->orWhereBetween('time_to', [$validated['time_from'], $validated['time_to']])
+                          ->orWhere(function ($q) use ($validated) {
+                              $q->where('time_from', '<=', $validated['time_from'])
                                 ->where('time_to', '>=', $validated['time_to']);
-                        });
+                          });
                 })
                 ->exists();
 
@@ -140,7 +140,7 @@ class BookingController extends Controller
             'vehicleDriverAssignments.driver',
             'approvalLogs.approver.user'
         ]);
-
+        
         return response()->json([
             'success' => true,
             'data' => $booking,
@@ -151,7 +151,7 @@ class BookingController extends Controller
     {
         $assetTypes = AssetType::all();
         $assetDetails = AssetDetail::with('assetType')->get();
-
+        
         return response()->json([
             'success' => true,
             'data' => [
@@ -194,11 +194,11 @@ class BookingController extends Controller
                 ->where('id', '!=', $booking->id)
                 ->where(function ($query) use ($validated) {
                     $query->whereBetween('time_from', [$validated['time_from'], $validated['time_to']])
-                        ->orWhereBetween('time_to', [$validated['time_from'], $validated['time_to']])
-                        ->orWhere(function ($q) use ($validated) {
-                            $q->where('time_from', '<=', $validated['time_from'])
+                          ->orWhereBetween('time_to', [$validated['time_from'], $validated['time_to']])
+                          ->orWhere(function ($q) use ($validated) {
+                              $q->where('time_from', '<=', $validated['time_from'])
                                 ->where('time_to', '>=', $validated['time_to']);
-                        });
+                          });
                 })
                 ->exists();
 
@@ -317,11 +317,11 @@ class BookingController extends Controller
             })
             ->where(function ($query) use ($validated) {
                 $query->whereBetween('time_from', [$validated['time_from'], $validated['time_to']])
-                    ->orWhereBetween('time_to', [$validated['time_from'], $validated['time_to']])
-                    ->orWhere(function ($q) use ($validated) {
-                        $q->where('time_from', '<=', $validated['time_from'])
+                      ->orWhereBetween('time_to', [$validated['time_from'], $validated['time_to']])
+                      ->orWhere(function ($q) use ($validated) {
+                          $q->where('time_from', '<=', $validated['time_from'])
                             ->where('time_to', '>=', $validated['time_to']);
-                    });
+                      });
             })
             ->pluck('asset_detail_id');
 

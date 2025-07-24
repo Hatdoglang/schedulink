@@ -33,7 +33,7 @@ class DashboardController extends Controller
 
             // Asset utilization
             $assetTypes = AssetType::withCount(['assetDetails', 'bookings'])->get();
-
+            
             // Recent bookings
             $recentBookings = Booking::with(['user', 'assetType', 'assetDetail'])
                 ->orderBy('created_at', 'desc')
@@ -42,9 +42,9 @@ class DashboardController extends Controller
 
             // Booking trends (last 30 days)
             $bookingTrends = Booking::select(
-                DB::raw('DATE(created_at) as date'),
-                DB::raw('COUNT(*) as count')
-            )
+                    DB::raw('DATE(created_at) as date'),
+                    DB::raw('COUNT(*) as count')
+                )
                 ->where('created_at', '>=', now()->subDays(30))
                 ->groupBy('date')
                 ->orderBy('date')
@@ -59,11 +59,9 @@ class DashboardController extends Controller
             // Asset utilization by type
             $assetUtilization = AssetType::select('asset_types.name')
                 ->withCount(['bookings as total_bookings'])
-                ->withCount([
-                    'bookings as approved_bookings' => function ($query) {
-                        $query->where('status', 'approved');
-                    }
-                ])
+                ->withCount(['bookings as approved_bookings' => function ($query) {
+                    $query->where('status', 'approved');
+                }])
                 ->get();
 
             // Upcoming bookings requiring attention
@@ -136,9 +134,9 @@ class DashboardController extends Controller
 
             // Daily booking counts
             $dailyBookings = Booking::select(
-                DB::raw('DATE(created_at) as date'),
-                DB::raw('COUNT(*) as count')
-            )
+                    DB::raw('DATE(created_at) as date'),
+                    DB::raw('COUNT(*) as count')
+                )
                 ->whereBetween('created_at', [$startDate, $endDate])
                 ->groupBy('date')
                 ->orderBy('date')
@@ -146,22 +144,18 @@ class DashboardController extends Controller
 
             // Asset type usage
             $assetTypeUsage = AssetType::select('asset_types.name')
-                ->withCount([
-                    'bookings as bookings_count' => function ($query) use ($startDate, $endDate) {
-                        $query->whereBetween('created_at', [$startDate, $endDate]);
-                    }
-                ])
+                ->withCount(['bookings as bookings_count' => function ($query) use ($startDate, $endDate) {
+                    $query->whereBetween('created_at', [$startDate, $endDate]);
+                }])
                 ->having('bookings_count', '>', 0)
                 ->orderBy('bookings_count', 'desc')
                 ->get();
 
             // Top users by booking count
             $topUsers = User::select('users.first_name', 'users.last_name', 'users.email')
-                ->withCount([
-                    'bookings as bookings_count' => function ($query) use ($startDate, $endDate) {
-                        $query->whereBetween('created_at', [$startDate, $endDate]);
-                    }
-                ])
+                ->withCount(['bookings as bookings_count' => function ($query) use ($startDate, $endDate) {
+                    $query->whereBetween('created_at', [$startDate, $endDate]);
+                }])
                 ->having('bookings_count', '>', 0)
                 ->orderBy('bookings_count', 'desc')
                 ->limit(10)

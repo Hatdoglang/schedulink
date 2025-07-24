@@ -30,8 +30,8 @@ class UserManagementController extends Controller
                 $search = $request->search;
                 $query->where(function ($q) use ($search) {
                     $q->where('first_name', 'like', "%{$search}%")
-                        ->orWhere('last_name', 'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%");
+                      ->orWhere('last_name', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%");
                 });
             }
 
@@ -123,15 +123,15 @@ class UserManagementController extends Controller
     {
         try {
             $user = User::with([
-                'role',
-                'businessUnit',
-                'companyCode',
-                'branch',
+                'role', 
+                'businessUnit', 
+                'companyCode', 
+                'branch', 
                 'department',
                 'bookings' => function ($query) {
                     $query->with(['assetType', 'assetDetail'])
-                        ->orderBy('created_at', 'desc')
-                        ->limit(10);
+                          ->orderBy('created_at', 'desc')
+                          ->limit(10);
                 }
             ])->findOrFail($id);
 
@@ -257,7 +257,7 @@ class UserManagementController extends Controller
     {
         try {
             $user = User::findOrFail($id);
-
+            
             // Check if user has active bookings
             $activeBookings = $user->bookings()
                 ->whereIn('status', ['pending', 'approved'])

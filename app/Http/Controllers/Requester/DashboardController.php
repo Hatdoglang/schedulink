@@ -17,7 +17,7 @@ class DashboardController extends Controller
     {
         try {
             $userId = Auth::id();
-
+            
             // Get booking statistics for the current user
             $totalBookings = Booking::where('user_id', $userId)->count();
             $pendingBookings = Booking::where('user_id', $userId)->where('status', 'pending')->count();

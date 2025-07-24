@@ -15,7 +15,7 @@ class BusinessUnitController extends Controller
     public function index(): JsonResponse
     {
         $businessUnits = BusinessUnit::with('users')->get();
-
+        
         return response()->json([
             'success' => true,
             'data' => $businessUnits,
@@ -67,7 +67,7 @@ class BusinessUnitController extends Controller
     public function show(BusinessUnit $businessUnit): JsonResponse
     {
         $businessUnit->load('users');
-
+        
         return response()->json([
             'success' => true,
             'data' => $businessUnit,

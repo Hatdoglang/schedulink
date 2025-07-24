@@ -15,7 +15,7 @@ class CompanyCodeController extends Controller
     public function index(): JsonResponse
     {
         $companyCodes = CompanyCode::with('users')->get();
-
+        
         return response()->json([
             'success' => true,
             'data' => $companyCodes,
@@ -66,7 +66,7 @@ class CompanyCodeController extends Controller
     public function show(CompanyCode $companyCode): JsonResponse
     {
         $companyCode->load('users');
-
+        
         return response()->json([
             'success' => true,
             'data' => $companyCode,
