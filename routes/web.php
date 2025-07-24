@@ -26,10 +26,29 @@ Route::get('/debug-role', function () {
     ];
 })->middleware('auth')->name('debug.role');
 
+// Test route for profile
+Route::get('/test-profile', function () {
+    if (!auth()->check()) {
+        return 'User not logged in - please login first';
+    }
+    
+    return [
+        'profile_route_exists' => route('profile'),
+        'profile_edit_route_exists' => route('profile.edit'),
+        'user_name' => auth()->user()->full_name,
+        'message' => 'Profile routes are working correctly!'
+    ];
+})->middleware('auth')->name('test.profile');
+
 // Protected Routes (require auth)
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::view('/dashboard', 'dashboard')->name('dashboard');
     Route::view('/profile', 'profile')->name('profile');
+    
+    // Profile management routes (traditional forms)
+    Route::get('/profile/edit', [App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [App\Http\Controllers\ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
 // Include role-based routes

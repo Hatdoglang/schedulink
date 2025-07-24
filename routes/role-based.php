@@ -111,9 +111,6 @@ Route::prefix('approver')->name('approver.')->middleware(['auth', 'verified', 'r
 // Shared Routes (accessible by multiple roles)
 Route::middleware(['auth', 'verified'])->group(function () {
     
-    // Profile Management
-    Route::resource('profile', App\Http\Controllers\ProfileController::class);
-    
     // Asset Files (for viewing/downloading)
     Route::resource('asset-files', App\Http\Controllers\AssetFileController::class);
     
@@ -148,5 +145,17 @@ Route::prefix('api')->name('api.')->middleware(['auth:sanctum'])->group(function
         Route::get('/pending-approvals', [ApprovalController::class, 'getPendingApprovals']);
         Route::patch('/approve/{bookingId}', [ApprovalController::class, 'approve']);
         Route::patch('/reject/{bookingId}', [ApprovalController::class, 'reject']);
+    });
+    
+    // Profile API (available to all authenticated users)
+    Route::prefix('profile')->name('profile.')->group(function () {
+        Route::get('/', [App\Http\Controllers\ProfileController::class, 'show']);
+        Route::patch('/update', [App\Http\Controllers\ProfileController::class, 'updateProfile']);
+        Route::patch('/password', [App\Http\Controllers\ProfileController::class, 'changePassword']);
+        Route::get('/bookings', [App\Http\Controllers\ProfileController::class, 'getUserBookings']);
+        Route::get('/pending-approvals', [App\Http\Controllers\ProfileController::class, 'getPendingApprovals']);
+        Route::get('/approval-history', [App\Http\Controllers\ProfileController::class, 'getApprovalHistory']);
+        Route::get('/dashboard-stats', [App\Http\Controllers\ProfileController::class, 'getDashboardStats']);
+        Route::get('/recent-activities', [App\Http\Controllers\ProfileController::class, 'getRecentActivities']);
     });
 });
