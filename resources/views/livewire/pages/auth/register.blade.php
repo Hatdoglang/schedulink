@@ -19,9 +19,13 @@
                         <x-input-label for="business_unit_id" :value="__('Business Unit')" />
                         <select wire:model="business_unit_id" id="business_unit_id" class="form-select" required>
                             <option value="">Select Business Unit</option>
-                            @foreach($businessUnits as $businessUnit)
-                                <option value="{{ $businessUnit->id }}">{{ $businessUnit->name }}</option>
-                            @endforeach
+                            @if(isset($businessUnits) && $businessUnits->count() > 0)
+                                @foreach($businessUnits as $businessUnit)
+                                    <option value="{{ $businessUnit->id }}">{{ $businessUnit->name }}</option>
+                                @endforeach
+                            @else
+                                <option value="" disabled>No business units available</option>
+                            @endif
                         </select>
                         <x-input-error :messages="$errors->get('business_unit_id')" class="mt-2" />
                     </div>
@@ -31,9 +35,13 @@
                         <x-input-label for="company_code_id" :value="__('Company Code')" />
                         <select wire:model="company_code_id" id="company_code_id" class="form-select" required>
                             <option value="">Select Company Code</option>
-                            @foreach($companyCodes as $companyCode)
-                                <option value="{{ $companyCode->id }}">{{ $companyCode->name }}</option>
-                            @endforeach
+                            @if(isset($companyCodes) && $companyCodes->count() > 0)
+                                @foreach($companyCodes as $companyCode)
+                                    <option value="{{ $companyCode->id }}">{{ $companyCode->name }}</option>
+                                @endforeach
+                            @else
+                                <option value="" disabled>No company codes available</option>
+                            @endif
                         </select>
                         <x-input-error :messages="$errors->get('company_code_id')" class="mt-2" />
                     </div>
@@ -45,9 +53,13 @@
                         <x-input-label for="branch_id" :value="__('Branch')" />
                         <select wire:model="branch_id" id="branch_id" class="form-select" required>
                             <option value="">Select Branch</option>
-                            @foreach($branches as $branch)
-                                <option value="{{ $branch->id }}">{{ $branch->name }}</option>
-                            @endforeach
+                            @if(isset($branches) && $branches->count() > 0)
+                                @foreach($branches as $branch)
+                                    <option value="{{ $branch->id }}">{{ $branch->name }}</option>
+                                @endforeach
+                            @else
+                                <option value="" disabled>No branches available</option>
+                            @endif
                         </select>
                         <x-input-error :messages="$errors->get('branch_id')" class="mt-2" />
                     </div>
@@ -57,9 +69,13 @@
                         <x-input-label for="department_id" :value="__('Department')" />
                         <select wire:model="department_id" id="department_id" class="form-select" required>
                             <option value="">Select Department</option>
-                            @foreach($departments as $department)
-                                <option value="{{ $department->id }}">{{ $department->name }}</option>
-                            @endforeach
+                            @if(isset($departments) && $departments->count() > 0)
+                                @foreach($departments as $department)
+                                    <option value="{{ $department->id }}">{{ $department->name }}</option>
+                                @endforeach
+                            @else
+                                <option value="" disabled>No departments available</option>
+                            @endif
                         </select>
                         <x-input-error :messages="$errors->get('department_id')" class="mt-2" />
                     </div>
@@ -110,9 +126,13 @@
                     <x-input-label for="role_id" :value="__('Role')" />
                     <select wire:model="role_id" id="role_id" class="form-select" required>
                         <option value="">Select Role</option>
-                        @foreach($roles as $role)
-                            <option value="{{ $role->id }}">{{ $role->name }}</option>
-                        @endforeach
+                        @if(isset($roles) && $roles->count() > 0)
+                            @foreach($roles as $role)
+                                <option value="{{ $role->id }}">{{ $role->name }}</option>
+                            @endforeach
+                        @else
+                            <option value="" disabled>No roles available</option>
+                        @endif
                     </select>
                     <x-input-error :messages="$errors->get('role_id')" class="mt-2" />
                 </div>

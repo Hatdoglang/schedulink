@@ -30,22 +30,8 @@ class Register extends Component
     public $department_id = '';
     public $role_id = '';
 
-    // Collections for dropdowns
-    public $businessUnits;
-    public $companyCodes;
-    public $branches;
-    public $departments;
-    public $roles;
-
     public function mount()
     {
-        // Load data for dropdowns
-        $this->businessUnits = BusinessUnit::all();
-        $this->companyCodes = CompanyCode::all();
-        $this->branches = Branch::all();
-        $this->departments = Department::all();
-        $this->roles = Role::all();
-        
         // Set default role to 'User' if exists
         $defaultRole = Role::where('name', 'User')->first();
         if ($defaultRole) {
@@ -80,6 +66,58 @@ class Register extends Component
 
     public function render()
     {
-        return view('livewire.pages.auth.register');
+        try {
+            // Load data for dropdowns in render method to ensure it's always available
+            $businessUnits = BusinessUnit::all();
+            $companyCodes = CompanyCode::all();
+            $branches = Branch::all();
+            $departments = Department::all();
+            $roles = Role::all();
+
+            // Create default data if tables are empty
+            if ($businessUnits->isEmpty()) {
+                BusinessUnit::create(['name' => 'Default Business Unit']);
+                $businessUnits = BusinessUnit::all();
+            }
+
+            if ($companyCodes->isEmpty()) {
+                CompanyCode::create(['name' => 'Default Company']);
+                $companyCodes = CompanyCode::all();
+            }
+
+            if ($branches->isEmpty()) {
+                Branch::create(['name' => 'Main Branch']);
+                $branches = Branch::all();
+            }
+
+            if ($departments->isEmpty()) {
+                Department::create(['name' => 'General']);
+                $departments = Department::all();
+            }
+
+            if ($roles->isEmpty()) {
+                Role::create(['name' => 'User']);
+                Role::create(['name' => 'Admin']);
+                Role::create(['name' => 'Manager']);
+                Role::create(['name' => 'Driver']);
+                $roles = Role::all();
+            }
+
+        } catch (\Exception $e) {
+            // Fallback data in case of database issues
+            $businessUnits = collect([]);
+            $companyCodes = collect([]);
+            $branches = collect([]);
+            $departments = collect([]);
+            $roles = collect([]);
+        }
+
+        return view('livewire.pages.auth.register', [
+            'businessUnits' => $businessUnits,
+            'companyCodes' => $companyCodes,
+            'branches' => $branches,
+            'departments' => $departments,
+            'roles' => $roles,
+        ]);
     }
 }
