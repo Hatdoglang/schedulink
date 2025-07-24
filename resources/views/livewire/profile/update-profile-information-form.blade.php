@@ -16,7 +16,7 @@ new class extends Component
      */
     public function mount(): void
     {
-        $this->name = Auth::user()->name;
+        $this->name = Auth::user()->full_name;
         $this->email = Auth::user()->email;
     }
 
@@ -32,7 +32,14 @@ new class extends Component
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)->ignore($user->id)],
         ]);
 
-        $user->fill($validated);
+        // Split name into first_name and last_name
+        $nameParts = explode(' ', trim($validated['name']), 2);
+        $firstName = $nameParts[0];
+        $lastName = isset($nameParts[1]) ? $nameParts[1] : '';
+
+        $user->first_name = $firstName;
+        $user->last_name = $lastName;
+        $user->email = $validated['email'];
 
         if ($user->isDirty('email')) {
             $user->email_verified_at = null;
@@ -40,7 +47,7 @@ new class extends Component
 
         $user->save();
 
-        $this->dispatch('profile-updated', name: $user->name);
+        $this->dispatch('profile-updated', name: $user->full_name);
     }
 
     /**
