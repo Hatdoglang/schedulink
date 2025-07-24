@@ -25,17 +25,22 @@ Route::prefix('requester')->name('requester.')->middleware(['auth', 'verified'])
     Route::get('/dashboard', App\Livewire\Requester\Dashboard::class)->name('dashboard');
 
     // Bookings Management
+    Route::get('/bookings', [RequesterBookingController::class, 'index'])->name('bookings');
     Route::prefix('bookings')->name('bookings.')->group(function () {
         Route::get('/', [RequesterBookingController::class, 'index'])->name('index');
-        Route::get('/create', function () {
-            return view('requester.bookings.create');
-        })->name('create');
+        Route::get('/create', App\Livewire\Requester\BookingCreate::class)->name('create');
         Route::post('/', [RequesterBookingController::class, 'store'])->name('store');
         Route::get('/{id}', [RequesterBookingController::class, 'show'])->name('show');
         Route::put('/{id}', [RequesterBookingController::class, 'update'])->name('update');
         Route::patch('/{id}/cancel', [RequesterBookingController::class, 'cancel'])->name('cancel');
         Route::get('/available-assets', [RequesterBookingController::class, 'getAvailableAssets'])->name('available-assets');
     });
+    
+    // Calendar
+    Route::get('/calendar', App\Livewire\Requester\Calendar::class)->name('calendar');
+    
+    // Notifications
+    Route::get('/notifications', App\Livewire\Requester\Notifications::class)->name('notifications');
 
     // Livewire Routes
     Route::get('/my-dashboard', App\Livewire\Requester\Dashboard::class)->name('livewire.dashboard');
