@@ -2,63 +2,111 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Department;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Validation\ValidationException;
 
 class DepartmentController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(): JsonResponse
     {
-        //
+        $departments = Department::with('users')->get();
+        
+        return response()->json([
+            'success' => true,
+            'data' => $departments,
+        ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        return response()->json([
+            'success' => true,
+            'message' => 'Create form data',
+        ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
-        //
+        try {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255|unique:departments,name',
+            ]);
+
+            $department = Department::create($validated);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Department created successfully',
+                'data' => $department,
+            ], 201);
+
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        }
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function show(Department $department): JsonResponse
     {
-        //
+        $department->load('users');
+        
+        return response()->json([
+            'success' => true,
+            'data' => $department,
+        ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function edit(Department $department): JsonResponse
     {
-        //
+        return response()->json([
+            'success' => true,
+            'data' => $department,
+        ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Department $department): JsonResponse
     {
-        //
+        try {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255|unique:departments,name,' . $department->id,
+            ]);
+
+            $department->update($validated);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Department updated successfully',
+                'data' => $department,
+            ]);
+
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy(Department $department): JsonResponse
     {
-        //
+        if ($department->users()->count() > 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot delete department with associated users',
+            ], 422);
+        }
+
+        $department->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Department deleted successfully',
+        ]);
     }
 }
