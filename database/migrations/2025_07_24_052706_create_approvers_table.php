@@ -13,6 +13,9 @@ return new class extends Migration
     {
         Schema::create('approvers', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('asset_type_id')->constrained('asset_types');
+            $table->foreignId('user_id')->constrained('users');
+            $table->integer('approver_level');
             $table->timestamps();
         });
     }

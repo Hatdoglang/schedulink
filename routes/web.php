@@ -11,6 +11,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::view('/profile', 'profile')->name('profile');
 });
 
+// Include role-based routes
+require __DIR__ . '/role-based.php';
+
 // Fallback redirect to login for any unmatched route
 Route::fallback(function () {
     return redirect('/login');

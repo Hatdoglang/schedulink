@@ -13,6 +13,14 @@ return new class extends Migration
     {
         Schema::create('asset_details', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('asset_type_id')->constrained('asset_types');
+            $table->string('asset_name');
+            $table->string('location');
+            $table->string('brand');
+            $table->string('model');
+            $table->string('color', 100);
+            $table->string('plate_number', 100);
+            $table->integer('number_of_seats');
             $table->timestamps();
         });
     }

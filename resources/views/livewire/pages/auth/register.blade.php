@@ -6,12 +6,68 @@
 
     <h3 class="mb-4">Register</h3>
 
-    <form wire:submit="register" class="w-100" style="max-width: 400px;">
-        <!-- Name -->
+    <form wire:submit="register" class="w-100" style="max-width: 500px;">
+        <!-- Business Unit -->
         <div class="mb-3 text-start">
-            <x-input-label for="name" :value="__('Name')" />
-            <x-text-input wire:model="name" id="name" class="form-control" type="text" required autofocus autocomplete="name" />
-            <x-input-error :messages="$errors->get('name')" class="mt-2" />
+            <x-input-label for="business_unit_id" :value="__('Business Unit')" />
+            <select wire:model="business_unit_id" id="business_unit_id" class="form-select" required>
+                <option value="">Select Business Unit</option>
+                @if(isset($businessUnits) && $businessUnits->count() > 0)
+                    @foreach($businessUnits as $businessUnit)
+                        <option value="{{ $businessUnit->id }}">{{ $businessUnit->name }}</option>
+                    @endforeach
+                @endif
+            </select>
+            <x-input-error :messages="$errors->get('business_unit_id')" class="mt-2" />
+        </div>
+
+        <!-- Company Code -->
+        <div class="mb-3 text-start">
+            <x-input-label for="company_code_id" :value="__('Company Code')" />
+            <select wire:model="company_code_id" id="company_code_id" class="form-select" required>
+                <option value="">Select Company Code</option>
+                @if(isset($companyCodes) && $companyCodes->count() > 0)
+                    @foreach($companyCodes as $companyCode)
+                        <option value="{{ $companyCode->id }}">{{ $companyCode->name }}</option>
+                    @endforeach
+                @endif
+            </select>
+            <x-input-error :messages="$errors->get('company_code_id')" class="mt-2" />
+        </div>
+
+        <!-- Branch -->
+        <div class="mb-3 text-start">
+            <x-input-label for="branch_id" :value="__('Branch')" />
+            <select wire:model="branch_id" id="branch_id" class="form-select" required>
+                <option value="">Select Branch</option>
+                @if(isset($branches) && $branches->count() > 0)
+                    @foreach($branches as $branch)
+                        <option value="{{ $branch->id }}">{{ $branch->name }}</option>
+                    @endforeach
+                @endif
+            </select>
+            <x-input-error :messages="$errors->get('branch_id')" class="mt-2" />
+        </div>
+
+        <!-- Department -->
+        <div class="mb-3 text-start">
+            <x-input-label for="department_id" :value="__('Department')" />
+            <select wire:model="department_id" id="department_id" class="form-select" required>
+                <option value="">Select Department</option>
+                @if(isset($departments) && $departments->count() > 0)
+                    @foreach($departments as $department)
+                        <option value="{{ $department->id }}">{{ $department->name }}</option>
+                    @endforeach
+                @endif
+            </select>
+            <x-input-error :messages="$errors->get('department_id')" class="mt-2" />
+        </div>
+
+        <!-- Full Name -->
+        <div class="mb-3 text-start">
+            <x-input-label for="full_name" :value="__('Full Name')" />
+            <x-text-input wire:model="full_name" id="full_name" class="form-control" type="text" required autofocus autocomplete="name" placeholder="Enter your full name" />
+            <x-input-error :messages="$errors->get('full_name')" class="mt-2" />
         </div>
 
         <!-- Email -->
@@ -19,6 +75,27 @@
             <x-input-label for="email" :value="__('Email')" />
             <x-text-input wire:model="email" id="email" class="form-control" type="email" required autocomplete="username" />
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
+        </div>
+
+        <!-- Mobile Number -->
+        <div class="mb-3 text-start">
+            <x-input-label for="mobile_number" :value="__('Mobile Number')" />
+            <x-text-input wire:model="mobile_number" id="mobile_number" class="form-control" type="tel" required autocomplete="tel" />
+            <x-input-error :messages="$errors->get('mobile_number')" class="mt-2" />
+        </div>
+
+        <!-- Role -->
+        <div class="mb-3 text-start">
+            <x-input-label for="role_id" :value="__('Role')" />
+            <select wire:model="role_id" id="role_id" class="form-select" required>
+                <option value="">Select Role</option>
+                @if(isset($roles) && $roles->count() > 0)
+                    @foreach($roles as $role)
+                        <option value="{{ $role->id }}">{{ $role->name }}</option>
+                    @endforeach
+                @endif
+            </select>
+            <x-input-error :messages="$errors->get('role_id')" class="mt-2" />
         </div>
 
         <!-- Password -->
