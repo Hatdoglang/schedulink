@@ -45,7 +45,9 @@ class Login extends Component
             'user_role' => $role?->name
         ]);
 
-        $this->redirectIntended(default: $redirectUrl, navigate: true);
+        // Use direct redirect for role-based routing
+        // This ensures proper navigation to admin/approver/requester dashboards
+        $this->redirect($redirectUrl, navigate: false);
     }
 
     public function render()

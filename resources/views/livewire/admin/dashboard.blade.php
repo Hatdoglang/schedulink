@@ -24,61 +24,102 @@ new class extends Component {
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                    <h3 class="text-lg font-semibold mb-4">
-                        Welcome, {{ Auth::user()->full_name ?? Auth::user()->email }}!
-                    </h3>
-
-                    @php
-                        $userRole = Auth::user()->role->name ?? 'User';
-                        $redirectUrl = \App\Services\RoleRedirectService::getRedirectUrl();
-                    @endphp
-
-                    <div class="mb-4">
-                        <p class="text-gray-600">
-                            Your role:
-                            <span class="font-semibold text-blue-600">{{ $userRole }}</span>
-                        </p>
+                    <h2 class="text-2xl font-bold mb-6">Admin Dashboard</h2>
+                    
+                    <!-- System Health Overview -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <h3 class="text-lg font-semibold text-blue-800">Total Users</h3>
+                            <p class="text-2xl font-bold text-blue-600">{{ $systemHealth['total_users'] ?? 0 }}</p>
+                        </div>
+                        <div class="bg-green-50 p-4 rounded-lg">
+                            <h3 class="text-lg font-semibold text-green-800">Active Users</h3>
+                            <p class="text-2xl font-bold text-green-600">{{ $systemHealth['active_users'] ?? 0 }}</p>
+                        </div>
+                        <div class="bg-yellow-50 p-4 rounded-lg">
+                            <h3 class="text-lg font-semibold text-yellow-800">Total Assets</h3>
+                            <p class="text-2xl font-bold text-yellow-600">{{ $systemHealth['total_assets'] ?? 0 }}</p>
+                        </div>
+                        <div class="bg-purple-50 p-4 rounded-lg">
+                            <h3 class="text-lg font-semibold text-purple-800">Total Bookings</h3>
+                            <p class="text-2xl font-bold text-purple-600">{{ $systemHealth['total_bookings'] ?? 0 }}</p>
+                        </div>
                     </div>
 
-                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                        <p class="text-blue-800">
-                            <i class="fas fa-info-circle mr-2"></i>
-                            You should be automatically redirected to your role-specific dashboard.
-                        </p>
+                    <!-- Booking Statistics -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h3 class="text-lg font-semibold text-gray-800">Pending</h3>
+                            <p class="text-2xl font-bold text-gray-600">{{ $bookingStatistics['pending'] ?? 0 }}</p>
+                        </div>
+                        <div class="bg-green-50 p-4 rounded-lg">
+                            <h3 class="text-lg font-semibold text-green-800">Approved</h3>
+                            <p class="text-2xl font-bold text-green-600">{{ $bookingStatistics['approved'] ?? 0 }}</p>
+                        </div>
+                        <div class="bg-red-50 p-4 rounded-lg">
+                            <h3 class="text-lg font-semibold text-red-800">Rejected</h3>
+                            <p class="text-2xl font-bold text-red-600">{{ $bookingStatistics['rejected'] ?? 0 }}</p>
+                        </div>
+                        <div class="bg-orange-50 p-4 rounded-lg">
+                            <h3 class="text-lg font-semibold text-orange-800">Cancelled</h3>
+                            <p class="text-2xl font-bold text-orange-600">{{ $bookingStatistics['cancelled'] ?? 0 }}</p>
+                        </div>
                     </div>
 
-                    <div class="space-y-2">
-                        <a href="{{ $redirectUrl }}" class="inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                            <i class="fas fa-tachometer-alt mr-2"></i>
-                            Go to My Dashboard
-                        </a>
-
-                        @if($userRole === 'Admin')
-                            <div class="mt-4">
-                                <h4 class="font-semibold text-gray-700 mb-2">Admin Quick Links:</h4>
-                                <div class="space-x-2">
-                                    <a href="/admin/users" class="text-blue-600 hover:text-blue-800">Manage Users</a>
-                                    <a href="/admin/bookings" class="text-blue-600 hover:text-blue-800">All Bookings</a>
-                                    <a href="/admin/asset-types" class="text-blue-600 hover:text-blue-800">Manage Assets</a>
-                                </div>
-                            </div>
-                        @elseif($userRole === 'Manager')
-                            <div class="mt-4">
-                                <h4 class="font-semibold text-gray-700 mb-2">Approver Quick Links:</h4>
-                                <div class="space-x-2">
-                                    <a href="/approver/approvals/pending" class="text-blue-600 hover:text-blue-800">Pending Approvals</a>
-                                    <a href="/approver/approvals/my-history" class="text-blue-600 hover:text-blue-800">My History</a>
-                                </div>
+                    <!-- Recent Bookings -->
+                    <div class="bg-white p-6 rounded-lg shadow mb-8">
+                        <h3 class="text-xl font-semibold mb-4">Recent Bookings</h3>
+                        @if(count($recentBookings) > 0)
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full table-auto">
+                                    <thead>
+                                        <tr class="bg-gray-50">
+                                            <th class="px-4 py-2 text-left">User</th>
+                                            <th class="px-4 py-2 text-left">Asset</th>
+                                            <th class="px-4 py-2 text-left">Date</th>
+                                            <th class="px-4 py-2 text-left">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($recentBookings as $booking)
+                                            <tr class="border-b">
+                                                <td class="px-4 py-2">{{ $booking->user->full_name ?? 'N/A' }}</td>
+                                                <td class="px-4 py-2">{{ $booking->assetDetail->name ?? $booking->assetType->name ?? 'N/A' }}</td>
+                                                <td class="px-4 py-2">{{ $booking->scheduled_date ?? 'N/A' }}</td>
+                                                <td class="px-4 py-2">
+                                                    <span class="px-2 py-1 rounded text-sm 
+                                                        @if($booking->status === 'approved') bg-green-100 text-green-800
+                                                        @elseif($booking->status === 'pending') bg-yellow-100 text-yellow-800
+                                                        @elseif($booking->status === 'rejected') bg-red-100 text-red-800
+                                                        @else bg-gray-100 text-gray-800
+                                                        @endif">
+                                                        {{ ucfirst($booking->status) }}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
                             </div>
                         @else
-                            <div class="mt-4">
-                                <h4 class="font-semibold text-gray-700 mb-2">Quick Links:</h4>
-                                <div class="space-x-2">
-                                    <a href="/requester/bookings" class="text-blue-600 hover:text-blue-800">My Bookings</a>
-                                    <a href="/requester/bookings/create" class="text-blue-600 hover:text-blue-800">New Booking</a>
-                                </div>
-                            </div>
+                            <p class="text-gray-500">No recent bookings found.</p>
                         @endif
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <a href="/admin/users" class="bg-blue-500 hover:bg-blue-600 text-white p-4 rounded-lg text-center transition">
+                            <h3 class="text-lg font-semibold">Manage Users</h3>
+                            <p class="text-sm">Add, edit, or remove users</p>
+                        </a>
+                        <a href="/admin/asset-types" class="bg-green-500 hover:bg-green-600 text-white p-4 rounded-lg text-center transition">
+                            <h3 class="text-lg font-semibold">Manage Assets</h3>
+                            <p class="text-sm">Configure asset types and details</p>
+                        </a>
+                        <a href="/admin/bookings" class="bg-purple-500 hover:bg-purple-600 text-white p-4 rounded-lg text-center transition">
+                            <h3 class="text-lg font-semibold">View All Bookings</h3>
+                            <p class="text-sm">Monitor all booking activities</p>
+                        </a>
                     </div>
                 </div>
             </div>

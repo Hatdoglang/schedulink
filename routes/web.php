@@ -71,6 +71,34 @@ Route::get('/test-profile', function () {
     ];
 })->middleware('auth')->name('test.profile');
 
+// ✅ Test admin dashboard access directly
+Route::get('/test-admin-dashboard', function () {
+    if (!auth()->check()) {
+        return redirect('/login');
+    }
+
+    $user = auth()->user();
+    $role = $user->role;
+    
+    if (!$role || $role->name !== 'Admin') {
+        return [
+            'error' => 'Access denied. Admin role required.',
+            'user_role' => $role?->name ?? 'No role assigned',
+            'user_id' => $user->id,
+            'redirect_to_login' => true,
+        ];
+    }
+
+    return [
+        'success' => 'Admin dashboard access test passed!',
+        'user_role' => $role->name,
+        'user_id' => $user->id,
+        'admin_dashboard_url' => '/admin/dashboard',
+        'can_access_admin_routes' => true,
+        'next_step' => 'Try accessing /admin/dashboard directly',
+    ];
+})->middleware('auth')->name('test.admin.dashboard');
+
 // ✅ Authenticated and verified routes
 Route::middleware(['auth', 'verified'])->group(function () {
     // Fallback dashboard for users without specific roles
