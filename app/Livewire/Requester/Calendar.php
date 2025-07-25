@@ -16,9 +16,11 @@ class Calendar extends Component
     public $currentYear;
     public $bookings = [];
     public $selectedBooking = null;
+    public $compactMode = false; // New property for compact dashboard view
 
-    public function mount()
+    public function mount($compactMode = false)
     {
+        $this->compactMode = $compactMode;
         $this->currentDate = now();
         $this->currentMonth = $this->currentDate->month;
         $this->currentYear = $this->currentDate->year;
