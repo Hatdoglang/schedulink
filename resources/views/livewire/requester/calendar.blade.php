@@ -1,4 +1,4 @@
-<div wire:init="loadBookings">
+<div wire:init="loadBookings" x-data="calendarComponent()">
     @if($compactMode)
     <!-- Compact Calendar with FullCalendar -->
     <div class="card">
@@ -6,14 +6,14 @@
             <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
                 <h6 class="mb-0">Calendar</h6>
                 <div class="d-flex align-items-center gap-2">
-                    <button id="prevBtn" class="btn btn-outline-secondary btn-sm px-3">‹</button>
-                    <button id="todayBtn" class="btn btn-primary btn-sm px-4">Today</button>
-                    <button id="nextBtn" class="btn btn-outline-secondary btn-sm px-3">›</button>
+                    <button @click="navigatePrev()" class="btn btn-outline-secondary btn-sm px-3">‹</button>
+                    <button @click="navigateToday()" class="btn btn-primary btn-sm px-4">Today</button>
+                    <button @click="navigateNext()" class="btn btn-outline-secondary btn-sm px-3">›</button>
                 </div>
             </div>
         </div>
         <div class="card-body p-0">
-            <div id="calendar-compact" style="height: 400px;"></div>
+            <div id="calendar-compact" style="height: 400px;" x-ref="calendarEl"></div>
         </div>
     </div>
 
@@ -25,20 +25,20 @@
                 <h4 class="mb-0">Calendar</h4>
                 <div class="d-flex align-items-center gap-2">
                     <div class="btn-group" role="group">
-                        <button id="dayGridBtn" class="btn btn-outline-primary btn-sm">Month</button>
-                        <button id="timeGridWeekBtn" class="btn btn-outline-primary btn-sm">Week</button>
-                        <button id="listBtn" class="btn btn-outline-primary btn-sm">List</button>
+                        <button @click="changeView('dayGridMonth')" :class="{'active': currentView === 'dayGridMonth'}" class="btn btn-outline-primary btn-sm">Month</button>
+                        <button @click="changeView('timeGridWeek')" :class="{'active': currentView === 'timeGridWeek'}" class="btn btn-outline-primary btn-sm">Week</button>
+                        <button @click="changeView('listWeek')" :class="{'active': currentView === 'listWeek'}" class="btn btn-outline-primary btn-sm">List</button>
                     </div>
                     <div class="btn-group" role="group">
-                        <button id="prevBtn" class="btn btn-outline-primary btn-sm px-3">‹</button>
-                        <button id="todayBtn" class="btn btn-primary btn-sm px-4">Today</button>
-                        <button id="nextBtn" class="btn btn-outline-primary btn-sm px-3">›</button>
+                        <button @click="navigatePrev()" class="btn btn-outline-primary btn-sm px-3">‹</button>
+                        <button @click="navigateToday()" class="btn btn-primary btn-sm px-4">Today</button>
+                        <button @click="navigateNext()" class="btn btn-outline-primary btn-sm px-3">›</button>
                     </div>
                 </div>
             </div>
         </div>
         <div class="card-body p-0">
-            <div id="calendar-full" style="min-height: 600px;"></div>
+            <div id="calendar-full" style="min-height: 600px;" x-ref="calendarEl"></div>
         </div>
     </div>
     @endif
@@ -118,247 +118,6 @@
         </div>
     </div>
     @endif
-
-    @script
-    <script>
-        // Global calendar instance
-        let calendar = null;
-        let isCalendarInitialized = false;
-        
-        function initializeCalendar() {
-            // Check if FullCalendar is available
-            if (typeof FullCalendar === 'undefined' || typeof FullCalendar.Calendar === 'undefined') {
-                console.log('FullCalendar not yet available, waiting...');
-                return false;
-            }
-            
-            // Prevent double initialization
-            if (isCalendarInitialized) {
-                console.log('Calendar already initialized');
-                return true;
-            }
-            
-            const calendarEl = document.getElementById('{{ $compactMode ? "calendar-compact" : "calendar-full" }}');
-            if (!calendarEl) {
-                console.error('Calendar element not found');
-                return false;
-            }
-            
-            const bookingsData = @json($bookingsForCalendar);
-            console.log('Initializing calendar with bookings:', bookingsData);
-            
-            try {
-                calendar = new FullCalendar.Calendar(calendarEl, {
-                    initialView: 'dayGridMonth',
-                    height: '{{ $compactMode ? "400" : "auto" }}',
-                    headerToolbar: false, // We're using custom buttons
-                    
-                    // Theme and styling
-                    themeSystem: 'bootstrap5',
-                    
-                    // Make sure dates are displayed
-                    dayHeaders: true,
-                    dayHeaderFormat: { weekday: 'short' },
-                    
-                    // Events data
-                    events: bookingsData,
-                    
-                    // Calendar options
-                    firstDay: 0, // Sunday
-                    weekNumbers: false,
-                    editable: false,
-                    selectable: false,
-                    
-                    // Ensure proper rendering
-                    aspectRatio: {{ $compactMode ? '1.35' : '1.35' }},
-                    
-                    // Event styling and content
-                    eventDidMount: function(info) {
-                        // Custom styling based on status
-                        const status = info.event.extendedProps.status;
-                        const element = info.el;
-                        
-                        element.style.borderRadius = '6px';
-                        element.style.border = 'none';
-                        element.style.fontSize = '12px';
-                        element.style.fontWeight = '500';
-                        
-                        if (status === 'approved') {
-                            element.style.backgroundColor = '#198754';
-                            element.style.color = 'white';
-                        } else if (status === 'pending') {
-                            element.style.backgroundColor = '#ffc107';
-                            element.style.color = '#000';
-                        } else {
-                            element.style.backgroundColor = '#dc3545';
-                            element.style.color = 'white';
-                        }
-                        
-                        // Add hover effect
-                        element.addEventListener('mouseenter', function() {
-                            element.style.transform = 'scale(1.05)';
-                            element.style.transition = 'transform 0.2s ease';
-                            element.style.zIndex = '1000';
-                        });
-                        
-                        element.addEventListener('mouseleave', function() {
-                            element.style.transform = 'scale(1)';
-                            element.style.zIndex = 'auto';
-                        });
-                    },
-                    
-                    // Event click handler
-                    eventClick: function(info) {
-                        const bookingId = info.event.extendedProps.booking_id;
-                        $wire.call('viewBooking', bookingId);
-                    },
-                    
-                    // Date click handler
-                    dateClick: function(info) {
-                        // Optional: Handle date clicks for creating new bookings
-                        console.log('Date clicked:', info.dateStr);
-                    },
-                    
-                    // Day cell content
-                    dayCellDidMount: function(info) {
-                        // Add subtle styling to today's date
-                        if (info.date.toDateString() === new Date().toDateString()) {
-                            info.el.style.backgroundColor = '#e3f2fd';
-                        }
-                    },
-                    
-                    // Responsive design
-                    windowResize: function() {
-                        calendar.updateSize();
-                    },
-                    
-                    // Debug rendering
-                    viewDidMount: function(info) {
-                        console.log('Calendar view mounted:', info.view.type);
-                    }
-                });
-                
-                calendar.render();
-                isCalendarInitialized = true;
-                console.log('Calendar initialized and rendered successfully');
-                
-                // Setup button event listeners
-                setupButtonListeners();
-                
-                return true;
-            } catch (error) {
-                console.error('Error initializing calendar:', error);
-                const calendarEl = document.getElementById('{{ $compactMode ? "calendar-compact" : "calendar-full" }}');
-                if (calendarEl) {
-                    calendarEl.innerHTML = '<div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i>Error initializing calendar. Please refresh the page.</div>';
-                }
-                return false;
-            }
-        }
-        
-        function setupButtonListeners() {
-            // Custom button handlers
-            const prevBtn = document.getElementById('prevBtn');
-            const nextBtn = document.getElementById('nextBtn');
-            const todayBtn = document.getElementById('todayBtn');
-            
-            if (prevBtn) {
-                prevBtn.addEventListener('click', function() {
-                    if (calendar) {
-                        calendar.prev();
-                        $wire.call('updateCurrentDate', calendar.getDate().toISOString().split('T')[0]);
-                    }
-                });
-            }
-            
-            if (nextBtn) {
-                nextBtn.addEventListener('click', function() {
-                    if (calendar) {
-                        calendar.next();
-                        $wire.call('updateCurrentDate', calendar.getDate().toISOString().split('T')[0]);
-                    }
-                });
-            }
-            
-            if (todayBtn) {
-                todayBtn.addEventListener('click', function() {
-                    if (calendar) {
-                        calendar.today();
-                        $wire.call('today');
-                    }
-                });
-            }
-            
-            // View switcher buttons (only for full calendar)
-            @if(!$compactMode)
-            const dayGridBtn = document.getElementById('dayGridBtn');
-            const timeGridWeekBtn = document.getElementById('timeGridWeekBtn');
-            const listBtn = document.getElementById('listBtn');
-            
-            if (dayGridBtn) {
-                dayGridBtn.addEventListener('click', function() {
-                    if (calendar) {
-                        calendar.changeView('dayGridMonth');
-                        document.querySelectorAll('#dayGridBtn, #timeGridWeekBtn, #listBtn').forEach(btn => btn.classList.remove('active'));
-                        dayGridBtn.classList.add('active');
-                    }
-                });
-            }
-            
-            if (timeGridWeekBtn) {
-                timeGridWeekBtn.addEventListener('click', function() {
-                    if (calendar) {
-                        calendar.changeView('timeGridWeek');
-                        document.querySelectorAll('#dayGridBtn, #timeGridWeekBtn, #listBtn').forEach(btn => btn.classList.remove('active'));
-                        timeGridWeekBtn.classList.add('active');
-                    }
-                });
-            }
-            
-            if (listBtn) {
-                listBtn.addEventListener('click', function() {
-                    if (calendar) {
-                        calendar.changeView('listWeek');
-                        document.querySelectorAll('#dayGridBtn, #timeGridWeekBtn, #listBtn').forEach(btn => btn.classList.remove('active'));
-                        listBtn.classList.add('active');
-                    }
-                });
-            }
-            
-            // Set initial active view
-            if (dayGridBtn) {
-                dayGridBtn.classList.add('active');
-            }
-            @endif
-        }
-        
-        // Initialize when DOM is ready or FullCalendar becomes available
-        document.addEventListener('DOMContentLoaded', function() {
-            // Add a small delay to ensure everything is loaded
-            setTimeout(function() {
-                initializeCalendar();
-            }, 100);
-        });
-        
-        // Listen for FullCalendar loaded event (from fallback)
-        window.addEventListener('fullcalendar-loaded', function() {
-            if (!isCalendarInitialized) {
-                setTimeout(function() {
-                    initializeCalendar();
-                }, 100);
-            }
-        });
-        
-        // Livewire refresh handler
-        $wire.on('refreshCalendar', () => {
-            if (calendar && isCalendarInitialized) {
-                const bookingsData = @json($bookingsForCalendar);
-                calendar.removeAllEvents();
-                calendar.addEventSource(bookingsData);
-            }
-        });
-    </script>
-    @endscript
 
     <style>
         /* Essential FullCalendar CSS - ensures dates are visible */
@@ -497,5 +256,209 @@
         .badge.fs-6 {
             font-size: 0.875rem !important;
         }
+        
+        /* Button active state */
+        .btn.active {
+            background-color: #0d6efd !important;
+            border-color: #0d6efd !important;
+            color: white !important;
+        }
     </style>
 </div>
+
+<script>
+function calendarComponent() {
+    return {
+        calendar: null,
+        isCalendarInitialized: false,
+        currentView: 'dayGridMonth',
+        compactMode: @json($compactMode),
+        bookingsData: @json($bookingsForCalendar),
+        
+        init() {
+            this.$nextTick(() => {
+                setTimeout(() => {
+                    this.initializeCalendar();
+                }, 150);
+            });
+            
+            // Listen for FullCalendar loaded event
+            window.addEventListener('fullcalendar-loaded', () => {
+                if (!this.isCalendarInitialized) {
+                    setTimeout(() => {
+                        this.initializeCalendar();
+                    }, 100);
+                }
+            });
+            
+            // Listen for Livewire updates
+            this.$wire.on('refreshCalendar', () => {
+                this.refreshEvents();
+            });
+        },
+        
+        initializeCalendar() {
+            // Check if FullCalendar is available
+            if (typeof FullCalendar === 'undefined' || typeof FullCalendar.Calendar === 'undefined') {
+                console.log('FullCalendar not yet available, waiting...');
+                return false;
+            }
+            
+            // Prevent double initialization
+            if (this.isCalendarInitialized) {
+                console.log('Calendar already initialized');
+                return true;
+            }
+            
+            const calendarEl = this.$refs.calendarEl;
+            if (!calendarEl) {
+                console.error('Calendar element not found');
+                return false;
+            }
+            
+            console.log('Initializing calendar with bookings:', this.bookingsData);
+            
+            try {
+                this.calendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: 'dayGridMonth',
+                    height: this.compactMode ? '400' : 'auto',
+                    headerToolbar: false,
+                    
+                    // Theme and styling
+                    themeSystem: 'bootstrap5',
+                    
+                    // Make sure dates are displayed
+                    dayHeaders: true,
+                    dayHeaderFormat: { weekday: 'short' },
+                    
+                    // Events data
+                    events: this.bookingsData,
+                    
+                    // Calendar options
+                    firstDay: 0,
+                    weekNumbers: false,
+                    editable: false,
+                    selectable: false,
+                    aspectRatio: 1.35,
+                    
+                    // Event styling and content
+                    eventDidMount: (info) => {
+                        this.styleEvent(info);
+                    },
+                    
+                    // Event click handler
+                    eventClick: (info) => {
+                        const bookingId = info.event.extendedProps.booking_id;
+                        this.$wire.call('viewBooking', bookingId);
+                    },
+                    
+                    // Date click handler
+                    dateClick: (info) => {
+                        console.log('Date clicked:', info.dateStr);
+                    },
+                    
+                    // Day cell content
+                    dayCellDidMount: (info) => {
+                        if (info.date.toDateString() === new Date().toDateString()) {
+                            info.el.style.backgroundColor = '#e3f2fd';
+                        }
+                    },
+                    
+                    // Responsive design
+                    windowResize: () => {
+                        if (this.calendar) {
+                            this.calendar.updateSize();
+                        }
+                    },
+                    
+                    // Debug rendering
+                    viewDidMount: (info) => {
+                        console.log('Calendar view mounted:', info.view.type);
+                        this.currentView = info.view.type;
+                    }
+                });
+                
+                this.calendar.render();
+                this.isCalendarInitialized = true;
+                console.log('Calendar initialized and rendered successfully');
+                
+                return true;
+            } catch (error) {
+                console.error('Error initializing calendar:', error);
+                if (calendarEl) {
+                    calendarEl.innerHTML = '<div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i>Error initializing calendar. Please refresh the page.</div>';
+                }
+                return false;
+            }
+        },
+        
+        styleEvent(info) {
+            const status = info.event.extendedProps.status;
+            const element = info.el;
+            
+            element.style.borderRadius = '6px';
+            element.style.border = 'none';
+            element.style.fontSize = '12px';
+            element.style.fontWeight = '500';
+            
+            if (status === 'approved') {
+                element.style.backgroundColor = '#198754';
+                element.style.color = 'white';
+            } else if (status === 'pending') {
+                element.style.backgroundColor = '#ffc107';
+                element.style.color = '#000';
+            } else {
+                element.style.backgroundColor = '#dc3545';
+                element.style.color = 'white';
+            }
+            
+            // Add hover effect
+            element.addEventListener('mouseenter', function() {
+                element.style.transform = 'scale(1.05)';
+                element.style.transition = 'transform 0.2s ease';
+                element.style.zIndex = '1000';
+            });
+            
+            element.addEventListener('mouseleave', function() {
+                element.style.transform = 'scale(1)';
+                element.style.zIndex = 'auto';
+            });
+        },
+        
+        navigatePrev() {
+            if (this.calendar) {
+                this.calendar.prev();
+                this.$wire.call('updateCurrentDate', this.calendar.getDate().toISOString().split('T')[0]);
+            }
+        },
+        
+        navigateNext() {
+            if (this.calendar) {
+                this.calendar.next();
+                this.$wire.call('updateCurrentDate', this.calendar.getDate().toISOString().split('T')[0]);
+            }
+        },
+        
+        navigateToday() {
+            if (this.calendar) {
+                this.calendar.today();
+                this.$wire.call('today');
+            }
+        },
+        
+        changeView(viewType) {
+            if (this.calendar) {
+                this.calendar.changeView(viewType);
+                this.currentView = viewType;
+            }
+        },
+        
+        refreshEvents() {
+            if (this.calendar && this.isCalendarInitialized) {
+                this.calendar.removeAllEvents();
+                this.calendar.addEventSource(this.bookingsData);
+            }
+        }
+    }
+}
+</script>
