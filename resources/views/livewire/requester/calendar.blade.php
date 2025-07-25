@@ -1,4 +1,4 @@
-<div>
+<div wire:init="loadBookings">
     @if($compactMode)
     <!-- Compact Calendar with FullCalendar -->
     <div class="card">
@@ -119,7 +119,7 @@
     </div>
     @endif
 
-    <!-- Script and Style Section -->
+    @script
     <script>
         // Global calendar instance
         let calendar = null;
@@ -197,7 +197,7 @@
                     // Event click handler
                     eventClick: function(info) {
                         const bookingId = info.event.extendedProps.booking_id;
-                        @this.call('viewBooking', bookingId);
+                        $wire.call('viewBooking', bookingId);
                     },
                     
                     // Date click handler
@@ -248,7 +248,7 @@
                 prevBtn.addEventListener('click', function() {
                     if (calendar) {
                         calendar.prev();
-                        @this.call('updateCurrentDate', calendar.getDate().toISOString().split('T')[0]);
+                        $wire.call('updateCurrentDate', calendar.getDate().toISOString().split('T')[0]);
                     }
                 });
             }
@@ -257,7 +257,7 @@
                 nextBtn.addEventListener('click', function() {
                     if (calendar) {
                         calendar.next();
-                        @this.call('updateCurrentDate', calendar.getDate().toISOString().split('T')[0]);
+                        $wire.call('updateCurrentDate', calendar.getDate().toISOString().split('T')[0]);
                     }
                 });
             }
@@ -266,7 +266,7 @@
                 todayBtn.addEventListener('click', function() {
                     if (calendar) {
                         calendar.today();
-                        @this.call('today');
+                        $wire.call('today');
                     }
                 });
             }
@@ -327,25 +327,15 @@
         });
         
         // Livewire refresh handler
-        document.addEventListener('livewire:update', function() {
+        $wire.on('refreshCalendar', () => {
             if (calendar && isCalendarInitialized) {
                 const bookingsData = @json($bookingsForCalendar);
                 calendar.removeAllEvents();
                 calendar.addEventSource(bookingsData);
             }
         });
-        
-        // Handle Livewire navigation
-        if (typeof Livewire !== 'undefined') {
-            Livewire.on('refreshCalendar', () => {
-                if (calendar && isCalendarInitialized) {
-                    const bookingsData = @json($bookingsForCalendar);
-                    calendar.removeAllEvents();
-                    calendar.addEventSource(bookingsData);
-                }
-            });
-        }
     </script>
+    @endscript
 
     <style>
         /* Custom FullCalendar styling */
