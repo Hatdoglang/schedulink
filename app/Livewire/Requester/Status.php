@@ -1,5 +1,5 @@
 <?php
-namespace App\Http\Livewire\Requester;
+namespace App\Livewire\Requester;
 
 use Livewire\Component;
 
