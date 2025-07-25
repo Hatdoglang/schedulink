@@ -22,9 +22,6 @@
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet" crossorigin="anonymous">
     
-    <!-- FullCalendar CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.18/main.min.css" rel="stylesheet" crossorigin="anonymous">
-    
     <!-- Custom Calendar Enhancements -->
     <link href="{{ asset('css/calendar-enhancements.css') }}" rel="stylesheet">
 
@@ -60,40 +57,48 @@
         </footer> --}}
     </div>
     
-    <!-- FullCalendar JS -->
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.18/main.min.js" crossorigin="anonymous"></script>
+    <!-- FullCalendar JS (includes CSS) -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.18/index.global.min.js" crossorigin="anonymous"></script>
     
     <!-- Bootstrap 5 JS Bundle (with Popper) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
     
-    <!-- Verify FullCalendar loaded -->
+    <!-- FullCalendar Initialization Check -->
     <script>
-        // Wait for DOM to be ready
+        // Wait for DOM to be ready and FullCalendar to load
         document.addEventListener('DOMContentLoaded', function() {
-            // Check if FullCalendar is loaded
-            if (typeof FullCalendar === 'undefined') {
-                console.error('FullCalendar failed to load from CDN');
-                
-                // Show a user-friendly message
-                const calendars = document.querySelectorAll('[id*="calendar"]');
-                calendars.forEach(function(cal) {
-                    cal.innerHTML = '<div class="alert alert-warning"><i class="fas fa-exclamation-triangle me-2"></i>Calendar library is loading... Please refresh the page if this message persists.</div>';
-                });
-                
-                // Try to load fallback version
-                const script = document.createElement('script');
-                script.src = 'https://unpkg.com/fullcalendar@6.1.18/main.min.js';
-                script.onload = function() {
-                    console.log('FullCalendar fallback loaded successfully');
-                    location.reload(); // Reload to initialize calendar
-                };
-                script.onerror = function() {
-                    console.error('FullCalendar fallback also failed to load');
-                };
-                document.head.appendChild(script);
-            } else {
-                console.log('FullCalendar loaded successfully', FullCalendar.Calendar);
-            }
+            // Small delay to ensure FullCalendar is fully loaded
+            setTimeout(function() {
+                if (typeof FullCalendar === 'undefined' || typeof FullCalendar.Calendar === 'undefined') {
+                    console.error('FullCalendar failed to load from primary CDN');
+                    
+                    // Show loading message in calendar containers
+                    const calendars = document.querySelectorAll('[id*="calendar"]');
+                    calendars.forEach(function(cal) {
+                        cal.innerHTML = '<div class="alert alert-warning"><i class="fas fa-exclamation-triangle me-2"></i>Loading calendar... If this persists, please refresh the page.</div>';
+                    });
+                    
+                    // Try fallback CDN
+                    const script = document.createElement('script');
+                    script.src = 'https://unpkg.com/fullcalendar@6.1.18/index.global.min.js';
+                    script.onload = function() {
+                        console.log('FullCalendar fallback loaded successfully');
+                        // Trigger a custom event to reinitialize calendars
+                        window.dispatchEvent(new CustomEvent('fullcalendar-loaded'));
+                    };
+                    script.onerror = function() {
+                        console.error('FullCalendar fallback also failed');
+                        calendars.forEach(function(cal) {
+                            cal.innerHTML = '<div class="alert alert-danger"><i class="fas fa-times-circle me-2"></i>Calendar failed to load. Please check your internet connection and refresh the page.</div>';
+                        });
+                    };
+                    document.head.appendChild(script);
+                } else {
+                    console.log('FullCalendar loaded successfully', FullCalendar.Calendar);
+                    // Dispatch event to notify components that FullCalendar is ready
+                    window.dispatchEvent(new CustomEvent('fullcalendar-loaded'));
+                }
+            }, 100);
         });
         
         // Toggle sidebar

@@ -121,129 +121,230 @@
 
     <!-- Script and Style Section -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        // Global calendar instance
+        let calendar = null;
+        let isCalendarInitialized = false;
+        
+        function initializeCalendar() {
+            // Check if FullCalendar is available
+            if (typeof FullCalendar === 'undefined' || typeof FullCalendar.Calendar === 'undefined') {
+                console.log('FullCalendar not yet available, waiting...');
+                return false;
+            }
+            
+            // Prevent double initialization
+            if (isCalendarInitialized) {
+                console.log('Calendar already initialized');
+                return true;
+            }
+            
             const calendarEl = document.getElementById('{{ $compactMode ? "calendar-compact" : "calendar-full" }}');
+            if (!calendarEl) {
+                console.error('Calendar element not found');
+                return false;
+            }
+            
             const bookingsData = @json($bookingsForCalendar);
+            console.log('Initializing calendar with bookings:', bookingsData);
             
-            const calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: '{{ $compactMode ? "dayGridMonth" : "dayGridMonth" }}',
-                height: '{{ $compactMode ? "400" : "auto" }}',
-                headerToolbar: false, // We're using custom buttons
-                
-                // Theme and styling
-                themeSystem: 'bootstrap5',
-                
-                // Events data
-                events: bookingsData,
-                
-                // Event styling and content
-                eventDidMount: function(info) {
-                    // Custom styling based on status
-                    const status = info.event.extendedProps.status;
-                    const element = info.el;
+            try {
+                calendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: '{{ $compactMode ? "dayGridMonth" : "dayGridMonth" }}',
+                    height: '{{ $compactMode ? "400" : "auto" }}',
+                    headerToolbar: false, // We're using custom buttons
                     
-                    element.style.borderRadius = '6px';
-                    element.style.border = 'none';
-                    element.style.fontSize = '12px';
-                    element.style.fontWeight = '500';
+                    // Theme and styling
+                    themeSystem: 'bootstrap5',
                     
-                    if (status === 'approved') {
-                        element.style.backgroundColor = '#198754';
-                        element.style.color = 'white';
-                    } else if (status === 'pending') {
-                        element.style.backgroundColor = '#ffc107';
-                        element.style.color = '#000';
-                    } else {
-                        element.style.backgroundColor = '#dc3545';
-                        element.style.color = 'white';
+                    // Events data
+                    events: bookingsData,
+                    
+                    // Event styling and content
+                    eventDidMount: function(info) {
+                        // Custom styling based on status
+                        const status = info.event.extendedProps.status;
+                        const element = info.el;
+                        
+                        element.style.borderRadius = '6px';
+                        element.style.border = 'none';
+                        element.style.fontSize = '12px';
+                        element.style.fontWeight = '500';
+                        
+                        if (status === 'approved') {
+                            element.style.backgroundColor = '#198754';
+                            element.style.color = 'white';
+                        } else if (status === 'pending') {
+                            element.style.backgroundColor = '#ffc107';
+                            element.style.color = '#000';
+                        } else {
+                            element.style.backgroundColor = '#dc3545';
+                            element.style.color = 'white';
+                        }
+                        
+                        // Add hover effect
+                        element.addEventListener('mouseenter', function() {
+                            element.style.transform = 'scale(1.05)';
+                            element.style.transition = 'transform 0.2s ease';
+                            element.style.zIndex = '1000';
+                        });
+                        
+                        element.addEventListener('mouseleave', function() {
+                            element.style.transform = 'scale(1)';
+                            element.style.zIndex = 'auto';
+                        });
+                    },
+                    
+                    // Event click handler
+                    eventClick: function(info) {
+                        const bookingId = info.event.extendedProps.booking_id;
+                        @this.call('viewBooking', bookingId);
+                    },
+                    
+                    // Date click handler
+                    dateClick: function(info) {
+                        // Optional: Handle date clicks for creating new bookings
+                        console.log('Date clicked:', info.dateStr);
+                    },
+                    
+                    // Day cell content
+                    dayCellDidMount: function(info) {
+                        // Add subtle styling to today's date
+                        if (info.date.toDateString() === new Date().toDateString()) {
+                            info.el.style.backgroundColor = '#e3f2fd';
+                        }
+                    },
+                    
+                    // Responsive design
+                    windowResize: function() {
+                        calendar.updateSize();
                     }
-                    
-                    // Add hover effect
-                    element.addEventListener('mouseenter', function() {
-                        element.style.transform = 'scale(1.05)';
-                        element.style.transition = 'transform 0.2s ease';
-                        element.style.zIndex = '1000';
-                    });
-                    
-                    element.addEventListener('mouseleave', function() {
-                        element.style.transform = 'scale(1)';
-                        element.style.zIndex = 'auto';
-                    });
-                },
+                });
                 
-                // Event click handler
-                eventClick: function(info) {
-                    const bookingId = info.event.extendedProps.booking_id;
-                    @this.call('viewBooking', bookingId);
-                },
+                calendar.render();
+                isCalendarInitialized = true;
+                console.log('Calendar initialized successfully');
                 
-                // Date click handler
-                dateClick: function(info) {
-                    // Optional: Handle date clicks for creating new bookings
-                    console.log('Date clicked:', info.dateStr);
-                },
+                // Setup button event listeners
+                setupButtonListeners();
                 
-                // Day cell content
-                dayCellDidMount: function(info) {
-                    // Add subtle styling to today's date
-                    if (info.date.toDateString() === new Date().toDateString()) {
-                        info.el.style.backgroundColor = '#e3f2fd';
-                    }
-                },
-                
-                // Responsive design
-                windowResize: function() {
-                    calendar.updateSize();
+                return true;
+            } catch (error) {
+                console.error('Error initializing calendar:', error);
+                const calendarEl = document.getElementById('{{ $compactMode ? "calendar-compact" : "calendar-full" }}');
+                if (calendarEl) {
+                    calendarEl.innerHTML = '<div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i>Error initializing calendar. Please refresh the page.</div>';
                 }
-            });
-            
-            calendar.render();
-            
+                return false;
+            }
+        }
+        
+        function setupButtonListeners() {
             // Custom button handlers
-            document.getElementById('prevBtn')?.addEventListener('click', function() {
-                calendar.prev();
-                @this.call('updateCurrentDate', calendar.getDate().toISOString().split('T')[0]);
-            });
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const todayBtn = document.getElementById('todayBtn');
             
-            document.getElementById('nextBtn')?.addEventListener('click', function() {
-                calendar.next();
-                @this.call('updateCurrentDate', calendar.getDate().toISOString().split('T')[0]);
-            });
+            if (prevBtn) {
+                prevBtn.addEventListener('click', function() {
+                    if (calendar) {
+                        calendar.prev();
+                        @this.call('updateCurrentDate', calendar.getDate().toISOString().split('T')[0]);
+                    }
+                });
+            }
             
-            document.getElementById('todayBtn')?.addEventListener('click', function() {
-                calendar.today();
-                @this.call('today');
-            });
+            if (nextBtn) {
+                nextBtn.addEventListener('click', function() {
+                    if (calendar) {
+                        calendar.next();
+                        @this.call('updateCurrentDate', calendar.getDate().toISOString().split('T')[0]);
+                    }
+                });
+            }
+            
+            if (todayBtn) {
+                todayBtn.addEventListener('click', function() {
+                    if (calendar) {
+                        calendar.today();
+                        @this.call('today');
+                    }
+                });
+            }
             
             // View switcher buttons (only for full calendar)
             @if(!$compactMode)
-            document.getElementById('dayGridBtn')?.addEventListener('click', function() {
-                calendar.changeView('dayGridMonth');
-                document.querySelectorAll('#dayGridBtn, #timeGridWeekBtn, #listBtn').forEach(btn => btn.classList.remove('active'));
-                document.getElementById('dayGridBtn').classList.add('active');
-            });
+            const dayGridBtn = document.getElementById('dayGridBtn');
+            const timeGridWeekBtn = document.getElementById('timeGridWeekBtn');
+            const listBtn = document.getElementById('listBtn');
             
-            document.getElementById('timeGridWeekBtn')?.addEventListener('click', function() {
-                calendar.changeView('timeGridWeek');
-                document.querySelectorAll('#dayGridBtn, #timeGridWeekBtn, #listBtn').forEach(btn => btn.classList.remove('active'));
-                document.getElementById('timeGridWeekBtn').classList.add('active');
-            });
+            if (dayGridBtn) {
+                dayGridBtn.addEventListener('click', function() {
+                    if (calendar) {
+                        calendar.changeView('dayGridMonth');
+                        document.querySelectorAll('#dayGridBtn, #timeGridWeekBtn, #listBtn').forEach(btn => btn.classList.remove('active'));
+                        dayGridBtn.classList.add('active');
+                    }
+                });
+            }
             
-            document.getElementById('listBtn')?.addEventListener('click', function() {
-                calendar.changeView('listWeek');
-                document.querySelectorAll('#dayGridBtn, #timeGridWeekBtn, #listBtn').forEach(btn => btn.classList.remove('active'));
-                document.getElementById('listBtn').classList.add('active');
-            });
+            if (timeGridWeekBtn) {
+                timeGridWeekBtn.addEventListener('click', function() {
+                    if (calendar) {
+                        calendar.changeView('timeGridWeek');
+                        document.querySelectorAll('#dayGridBtn, #timeGridWeekBtn, #listBtn').forEach(btn => btn.classList.remove('active'));
+                        timeGridWeekBtn.classList.add('active');
+                    }
+                });
+            }
+            
+            if (listBtn) {
+                listBtn.addEventListener('click', function() {
+                    if (calendar) {
+                        calendar.changeView('listWeek');
+                        document.querySelectorAll('#dayGridBtn, #timeGridWeekBtn, #listBtn').forEach(btn => btn.classList.remove('active'));
+                        listBtn.classList.add('active');
+                    }
+                });
+            }
             
             // Set initial active view
-            document.getElementById('dayGridBtn')?.classList.add('active');
+            if (dayGridBtn) {
+                dayGridBtn.classList.add('active');
+            }
             @endif
-            
-            // Livewire refresh handler
-            Livewire.on('refreshCalendar', () => {
-                calendar.refetchEvents();
-            });
+        }
+        
+        // Initialize when DOM is ready or FullCalendar becomes available
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCalendar();
         });
+        
+        // Listen for FullCalendar loaded event (from fallback)
+        window.addEventListener('fullcalendar-loaded', function() {
+            if (!isCalendarInitialized) {
+                initializeCalendar();
+            }
+        });
+        
+        // Livewire refresh handler
+        document.addEventListener('livewire:update', function() {
+            if (calendar && isCalendarInitialized) {
+                const bookingsData = @json($bookingsForCalendar);
+                calendar.removeAllEvents();
+                calendar.addEventSource(bookingsData);
+            }
+        });
+        
+        // Handle Livewire navigation
+        if (typeof Livewire !== 'undefined') {
+            Livewire.on('refreshCalendar', () => {
+                if (calendar && isCalendarInitialized) {
+                    const bookingsData = @json($bookingsForCalendar);
+                    calendar.removeAllEvents();
+                    calendar.addEventSource(bookingsData);
+                }
+            });
+        }
     </script>
 
     <style>
