@@ -119,6 +119,7 @@
     </div>
     @endif
 
+    <!-- Script and Style Section -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const calendarEl = document.getElementById('{{ $compactMode ? "calendar-compact" : "calendar-full" }}');
@@ -235,7 +236,7 @@
             });
             
             // Set initial active view
-            document.getElementById('dayGridBtn').classList.add('active');
+            document.getElementById('dayGridBtn')?.classList.add('active');
             @endif
             
             // Livewire refresh handler
