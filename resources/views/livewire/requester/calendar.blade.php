@@ -149,15 +149,28 @@
             
             try {
                 calendar = new FullCalendar.Calendar(calendarEl, {
-                    initialView: '{{ $compactMode ? "dayGridMonth" : "dayGridMonth" }}',
+                    initialView: 'dayGridMonth',
                     height: '{{ $compactMode ? "400" : "auto" }}',
                     headerToolbar: false, // We're using custom buttons
                     
                     // Theme and styling
                     themeSystem: 'bootstrap5',
                     
+                    // Make sure dates are displayed
+                    dayHeaders: true,
+                    dayHeaderFormat: { weekday: 'short' },
+                    
                     // Events data
                     events: bookingsData,
+                    
+                    // Calendar options
+                    firstDay: 0, // Sunday
+                    weekNumbers: false,
+                    editable: false,
+                    selectable: false,
+                    
+                    // Ensure proper rendering
+                    aspectRatio: {{ $compactMode ? '1.35' : '1.35' }},
                     
                     // Event styling and content
                     eventDidMount: function(info) {
@@ -217,12 +230,17 @@
                     // Responsive design
                     windowResize: function() {
                         calendar.updateSize();
+                    },
+                    
+                    // Debug rendering
+                    viewDidMount: function(info) {
+                        console.log('Calendar view mounted:', info.view.type);
                     }
                 });
                 
                 calendar.render();
                 isCalendarInitialized = true;
-                console.log('Calendar initialized successfully');
+                console.log('Calendar initialized and rendered successfully');
                 
                 // Setup button event listeners
                 setupButtonListeners();
@@ -316,13 +334,18 @@
         
         // Initialize when DOM is ready or FullCalendar becomes available
         document.addEventListener('DOMContentLoaded', function() {
-            initializeCalendar();
+            // Add a small delay to ensure everything is loaded
+            setTimeout(function() {
+                initializeCalendar();
+            }, 100);
         });
         
         // Listen for FullCalendar loaded event (from fallback)
         window.addEventListener('fullcalendar-loaded', function() {
             if (!isCalendarInitialized) {
-                initializeCalendar();
+                setTimeout(function() {
+                    initializeCalendar();
+                }, 100);
             }
         });
         
@@ -338,58 +361,131 @@
     @endscript
 
     <style>
-        /* Custom FullCalendar styling */
+        /* Essential FullCalendar CSS - ensures dates are visible */
         .fc {
             font-family: 'Figtree', sans-serif;
+            direction: ltr;
+            text-align: left;
         }
         
-        .fc-event {
-            cursor: pointer;
-            transition: all 0.2s ease;
+        .fc table {
+            border-collapse: collapse;
+            border-spacing: 0;
+            font-size: 1em;
         }
         
-        .fc-event:hover {
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        .fc th,
+        .fc td {
+            vertical-align: top;
+            text-align: left;
         }
         
-        .fc-daygrid-event {
-            margin: 1px;
-            padding: 2px 4px;
+        /* Day grid essential styles */
+        .fc-daygrid {
+            position: relative;
+        }
+        
+        .fc-daygrid-day {
+            position: relative;
+        }
+        
+        .fc-daygrid-day-number {
+            position: relative;
+            z-index: 4;
+            padding: 4px;
+            display: block;
+            min-height: 1.5em;
+            color: #212529 !important;
+            text-decoration: none;
+            font-weight: 600 !important;
+            font-size: 0.875rem;
+        }
+        
+        .fc-daygrid-day-top {
+            position: relative;
+            z-index: 2;
+        }
+        
+        /* Column headers */
+        .fc-col-header-cell {
+            background-color: #f8f9fa !important;
+            font-weight: 600 !important;
+            color: #495057 !important;
+            border: 1px solid #dee2e6 !important;
+            padding: 0.75rem 0.5rem !important;
+            text-align: center;
+        }
+        
+        /* Day cells */
+        .fc-daygrid-day {
+            border: 1px solid #dee2e6 !important;
+            background: white;
+            min-height: 100px;
         }
         
         .fc-day-today {
             background-color: rgba(13, 110, 253, 0.1) !important;
         }
         
-        .fc-day:hover {
-            background-color: rgba(0,0,0,0.05);
+        .fc-day-other {
+            background-color: #f8f9fa !important;
+        }
+        
+        .fc-day-other .fc-daygrid-day-number {
+            color: #6c757d !important;
+        }
+        
+        /* Events */
+        .fc-event {
             cursor: pointer;
+            transition: all 0.2s ease;
+            border: none !important;
+            border-radius: 4px;
+            margin: 1px;
+            padding: 2px 4px;
+            font-size: 11px;
         }
         
-        .fc-col-header-cell {
-            background-color: #f8f9fa;
-            font-weight: 600;
+        .fc-event:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            transform: translateY(-1px);
         }
         
-        .fc-scrollgrid {
-            border: 1px solid #dee2e6;
-            border-radius: 0.375rem;
+        .fc-event-title {
+            font-weight: 500;
         }
         
-        .fc-timegrid-slot {
-            height: 3em;
-        }
-        
-        /* Responsive adjustments */
+        /* Responsive styles */
         @media (max-width: 768px) {
-            .fc-toolbar {
-                flex-direction: column;
-                gap: 0.5rem;
+            .fc-daygrid-day {
+                min-height: 80px;
+            }
+            
+            .fc-daygrid-day-number {
+                font-size: 0.75rem;
+                padding: 2px;
             }
             
             .fc-event {
                 font-size: 10px;
+                padding: 1px 3px;
             }
+        }
+        
+        /* Scrollgrid styling */
+        .fc-scrollgrid {
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
+            overflow: hidden;
+        }
+        
+        .fc-scrollgrid-section > * {
+            border-left: 0;
+            border-right: 0;
+        }
+        
+        .fc-scrollgrid-section-header > td {
+            border-bottom: 1px solid #dee2e6;
         }
         
         /* Modal enhancements */
