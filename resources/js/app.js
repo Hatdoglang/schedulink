@@ -1,4 +1,5 @@
 import './bootstrap';
+import './fullcalendar-setup';
 
 import Alpine from 'alpinejs';
 
