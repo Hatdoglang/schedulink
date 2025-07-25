@@ -24,9 +24,19 @@ Route::prefix('requester')->name('requester.')->middleware(['auth', 'verified'])
     // Dashboard - Use Livewire component for web interface
     Route::get('/dashboard', App\Livewire\Requester\Dashboard::class)->name('dashboard');
 
+    // Main bookings route (Livewire component for list view)
+    Route::get('/bookings', App\Livewire\Requester\BookingsList::class)->name('bookings');
+
+    // Calendar route (Livewire component)
+    Route::get('/calendar', App\Livewire\Requester\Calendar::class)->name('calendar');
+
+    // Notifications route (Livewire component)
+    Route::get('/notifications', App\Livewire\Requester\Notifications::class)->name('notifications');
+
     // Bookings Management
     Route::prefix('bookings')->name('bookings.')->group(function () {
-        Route::get('/', [RequesterBookingController::class, 'index'])->name('index');
+        // Note: the main bookings index route is defined above, this is for API/sub-routes
+        // Route::get('/', [RequesterBookingController::class, 'index'])->name('index');
         Route::get('/create', function () {
             return view('requester.bookings.create');
         })->name('create');
