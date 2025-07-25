@@ -1,8 +1,12 @@
 <?php
+// NOTE: All routes in this file are automatically prefixed with /api by Laravel.
+// For example, Route::get('/bookings', ...) is accessible at /api/bookings
+
 use Illuminate\Support\Facades\Route;
 use App\Models\Booking;
 use Illuminate\Http\Request;
 
+// Use /api/bookings as the endpoint from your frontend (e.g., FullCalendar)
 Route::get('/bookings', function (Request $request) {
     $query = Booking::with(['user', 'assetType']);
 
