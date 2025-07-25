@@ -8,7 +8,7 @@ use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Carbon\Carbon;
 
-#[Layout('layouts.requester')]
+#[Layout('layouts.app')]
 class Calendar extends Component
 {
     public $currentDate;
