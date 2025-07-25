@@ -1,3 +1,4 @@
+<div>
 @if($compactMode)
 <!-- Compact Calendar for Dashboard -->
 <div class="compact-calendar">
@@ -270,3 +271,4 @@
         }
     }
 </style>
+</div>
