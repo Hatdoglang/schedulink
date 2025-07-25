@@ -43,6 +43,76 @@ class Calendar extends Component
             });
     }
 
+    public function getBookingsForCalendarProperty()
+    {
+        $bookingsForCalendar = [];
+        
+        foreach ($this->bookings as $date => $dayBookings) {
+            foreach ($dayBookings as $booking) {
+                $startDateTime = $booking->scheduled_date . ' ' . $booking->time_from;
+                $endDateTime = $booking->scheduled_date . ' ' . $booking->time_to;
+                
+                $bookingsForCalendar[] = [
+                    'id' => 'booking-' . $booking->id,
+                    'title' => $this->getEventTitle($booking),
+                    'start' => $startDateTime,
+                    'end' => $endDateTime,
+                    'backgroundColor' => $this->getEventColor($booking->status),
+                    'borderColor' => $this->getEventColor($booking->status),
+                    'textColor' => $this->getEventTextColor($booking->status),
+                    'extendedProps' => [
+                        'booking_id' => $booking->id,
+                        'status' => $booking->status,
+                        'asset_name' => $booking->assetDetail->name ?? 'Unknown Asset',
+                        'purpose' => $booking->purpose,
+                        'destination' => $booking->destination,
+                        'notes' => $booking->notes,
+                    ]
+                ];
+            }
+        }
+        
+        return $bookingsForCalendar;
+    }
+
+    private function getEventTitle($booking)
+    {
+        $assetName = $booking->assetDetail->name ?? 'Booking';
+        $time = Carbon::parse($booking->time_from)->format('H:i');
+        
+        if ($this->compactMode) {
+            return $time . ' - ' . $assetName;
+        }
+        
+        return $time . ' - ' . $assetName . ($booking->purpose ? ' (' . $booking->purpose . ')' : '');
+    }
+
+    private function getEventColor($status)
+    {
+        return match($status) {
+            'approved' => '#198754',
+            'pending' => '#ffc107',
+            'rejected' => '#dc3545',
+            default => '#6c757d'
+        };
+    }
+
+    private function getEventTextColor($status)
+    {
+        return match($status) {
+            'pending' => '#000',
+            default => '#fff'
+        };
+    }
+
+    public function updateCurrentDate($date)
+    {
+        $this->currentDate = Carbon::parse($date);
+        $this->currentMonth = $this->currentDate->month;
+        $this->currentYear = $this->currentDate->year;
+        $this->loadBookings();
+    }
+
     public function previousMonth()
     {
         $date = Carbon::create($this->currentYear, $this->currentMonth, 1)->subMonth();
@@ -82,6 +152,12 @@ class Calendar extends Component
         $this->selectedBooking = null;
     }
 
+    public function refreshCalendar()
+    {
+        $this->loadBookings();
+        $this->dispatch('refreshCalendar');
+    }
+
     public function render()
     {
         $startOfMonth = Carbon::create($this->currentYear, $this->currentMonth, 1);
@@ -117,6 +193,7 @@ class Calendar extends Component
             'viewMode' => $this->viewMode,
             'currentMonth' => $this->currentMonth,
             'bookings' => $this->bookings,
+            'bookingsForCalendar' => $this->bookingsForCalendar,
         ]);
     }
 }
