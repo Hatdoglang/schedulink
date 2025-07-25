@@ -12,18 +12,18 @@
     <link rel="icon" type="image/png" href="{{ asset('images/link.png') }}">
 
     <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-..."
-        crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <link href="{{ asset('css/calendar-enhancements.css') }}" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <!-- FullCalendar CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet" crossorigin="anonymous">
+
+    <!-- Custom Calendar Enhancements -->
+    {{-- <link href="{{ asset('css/calendar-enhancements.css') }}" rel="stylesheet"> --}}
 
     <!-- Custom Styles (Optional if using Vite for your app.css) -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -56,26 +56,69 @@
             <small class="text-muted">&copy; {{ date('Y') }} Schedulink</small>
         </footer> --}}
     </div>
-    <!-- FullCalendar JS -->
-    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.js'></script>
+
+    <!-- FullCalendar JS (includes CSS) -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.18/index.global.min.js" crossorigin="anonymous"></script>
+
     <!-- Bootstrap 5 JS Bundle (with Popper) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-..." crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+    <!-- FullCalendar Initialization Check -->
     <script>
+        // Wait for DOM to be ready and FullCalendar to load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Small delay to ensure FullCalendar is fully loaded
+            setTimeout(function() {
+                if (typeof FullCalendar === 'undefined' || typeof FullCalendar.Calendar === 'undefined') {
+                    console.error('FullCalendar failed to load from primary CDN');
+
+                    // Show loading message in calendar containers
+                    const calendars = document.querySelectorAll('[id*="calendar"]');
+                    calendars.forEach(function(cal) {
+                        cal.innerHTML =
+                            '<div class="alert alert-warning"><i class="fas fa-exclamation-triangle me-2"></i>Loading calendar... If this persists, please refresh the page.</div>';
+                    });
+
+                    // Try fallback CDN
+                    const script = document.createElement('script');
+                    script.src = 'https://unpkg.com/fullcalendar@6.1.18/index.global.min.js';
+                    script.onload = function() {
+                        console.log('FullCalendar fallback loaded successfully');
+                        // Trigger a custom event to reinitialize calendars
+                        window.dispatchEvent(new CustomEvent('fullcalendar-loaded'));
+                    };
+                    script.onerror = function() {
+                        console.error('FullCalendar fallback also failed');
+                        calendars.forEach(function(cal) {
+                            cal.innerHTML =
+                                '<div class="alert alert-danger"><i class="fas fa-times-circle me-2"></i>Calendar failed to load. Please check your internet connection and refresh the page.</div>';
+                        });
+                    };
+                    document.head.appendChild(script);
+                } else {
+                    console.log('FullCalendar loaded successfully', FullCalendar.Calendar);
+                    // Dispatch event to notify components that FullCalendar is ready
+                    window.dispatchEvent(new CustomEvent('fullcalendar-loaded'));
+                }
+            }, 100);
+        });
+
         // Toggle sidebar
         function toggleSidebar() {
             const sidebar = document.querySelector('.sidebar');
             const mainContent = document.querySelector('.main-content');
 
-            sidebar.classList.toggle('collapsed');
-            mainContent.classList.toggle('expanded');
+            if (sidebar) sidebar.classList.toggle('collapsed');
+            if (mainContent) mainContent.classList.toggle('expanded');
         }
 
         // Mobile sidebar toggle
         function toggleMobileSidebar() {
             const sidebar = document.querySelector('.sidebar');
-            sidebar.classList.toggle('show');
+            if (sidebar) sidebar.classList.toggle('show');
         }
     </script>
+
     @livewireScripts
 </body>
 

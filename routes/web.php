@@ -4,13 +4,19 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\ProfileController;
+use App\Models\User;
+use App\Models\AssetType;
 
 // ✅ Redirect root URL to login
 Route::redirect('/', '/login');
 
 // ✅ Logout route (POST) using controller method that redirects to /login
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
-
+Route::get('/calendar', function () {
+    $users = User::select('id', 'first_name', 'last_name')->get();
+    $assetTypes = AssetType::select('id', 'name')->get();
+    return view('bookings.calendar', compact('users', 'assetTypes'));
+});
 // ✅ Role redirection test (requires login)
 Route::get('/debug-role', function () {
     if (!auth()->check()) {
