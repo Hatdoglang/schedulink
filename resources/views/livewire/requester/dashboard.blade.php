@@ -1,6 +1,11 @@
-<div class="container-fluid">
-    <!-- Statistics Cards -->
-    <div class="row mb-4">
+<!-- Include Sidebar Navigation -->
+@include('livewire.requester.sidebar')
+
+<!-- Main Content Area -->
+<div class="main-content">
+    <div class="container-fluid p-4">
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
         <div class="col-lg-3 col-md-6 mb-3">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
@@ -74,92 +79,135 @@
         </div>
     </div>
     
-    <!-- Main Content Row -->
-    <div class="row">
-        <!-- Recent Bookings -->
-        <div class="col-lg-8 mb-4">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-bottom-0 py-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0 fw-semibold">Recent Bookings</h5>
-                        <button wire:click="refreshData" class="btn btn-outline-primary btn-sm">
-                            <i class="fas fa-sync-alt"></i> Refresh
-                        </button>
-                    </div>
-                </div>
-                <div class="card-body p-0">
-                    @if($recentBookings && $recentBookings->count() > 0)
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th class="border-0">Asset</th>
-                                        <th class="border-0">Date</th>
-                                        <th class="border-0">Time</th>
-                                        <th class="border-0">Status</th>
-                                        <th class="border-0">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($recentBookings as $booking)
-                                        <tr>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    <div class="bg-primary bg-opacity-10 rounded p-2 me-2">
-                                                        <i class="fas fa-cube text-primary"></i>
-                                                    </div>
-                                                    <div>
-                                                        <div class="fw-semibold">{{ $booking->assetType->name ?? 'N/A' }}</div>
-                                                        <small class="text-muted">{{ $booking->assetDetail->name ?? 'N/A' }}</small>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td>{{ \Carbon\Carbon::parse($booking->scheduled_date)->format('M d, Y') }}</td>
-                                            <td>{{ \Carbon\Carbon::parse($booking->time_from)->format('H:i') }} - {{ \Carbon\Carbon::parse($booking->time_to)->format('H:i') }}</td>
-                                            <td>
-                                                @php
-                                                    $statusColors = [
-                                                        'pending' => 'warning',
-                                                        'approved' => 'success',
-                                                        'rejected' => 'danger',
-                                                        'cancelled' => 'secondary'
-                                                    ];
-                                                    $color = $statusColors[$booking->status] ?? 'secondary';
-                                                @endphp
-                                                <span class="badge bg-{{ $color }}">{{ ucfirst($booking->status) }}</span>
-                                            </td>
-                                            <td>
-                                                <div class="btn-group btn-group-sm">
-                                                    <button class="btn btn-outline-primary" title="View Details">
-                                                        <i class="fas fa-eye"></i>
-                                                    </button>
-                                                    @if($booking->status === 'pending')
-                                                        <button class="btn btn-outline-danger" title="Cancel">
-                                                            <i class="fas fa-times"></i>
-                                                        </button>
-                                                    @endif
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    @else
-                        <div class="text-center py-5">
-                            <i class="fas fa-calendar-times text-muted fs-1"></i>
-                            <div class="mt-3">
-                                <h6 class="text-muted">No bookings yet</h6>
-                                <p class="text-muted">Start by creating your first booking</p>
-                                <a href="{{ route('requester.bookings.create') }}" class="btn btn-primary">
-                                    <i class="fas fa-plus me-2"></i>New Booking
+        <!-- Main Content Row -->
+        <div class="row">
+            <!-- Calendar Widget -->
+            <div class="col-lg-8 mb-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white border-bottom-0 py-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0 fw-semibold">Calendar View</h5>
+                            <div class="btn-group btn-group-sm">
+                                <button wire:click="refreshData" class="btn btn-outline-primary">
+                                    <i class="fas fa-sync-alt"></i> Refresh
+                                </button>
+                                <a href="{{ route('requester.calendar') }}" class="btn btn-primary">
+                                    <i class="fas fa-expand"></i> Full Calendar
                                 </a>
                             </div>
                         </div>
-                    @endif
+                    </div>
+                    <div class="card-body">
+                        <!-- Mini Calendar -->
+                        <div class="table-responsive">
+                            <table class="table table-bordered mb-0" style="font-size: 0.875rem;">
+                                <!-- Days of Week Header -->
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="text-center py-2 small">Sun</th>
+                                        <th class="text-center py-2 small">Mon</th>
+                                        <th class="text-center py-2 small">Tue</th>
+                                        <th class="text-center py-2 small">Wed</th>
+                                        <th class="text-center py-2 small">Thu</th>
+                                        <th class="text-center py-2 small">Fri</th>
+                                        <th class="text-center py-2 small">Sat</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if($calendarData ?? false)
+                                        @foreach($calendarData['weeks'] as $week)
+                                            <tr style="height: 80px;">
+                                                @foreach($week as $day)
+                                                    @php
+                                                        $dayString = $day['date'];
+                                                        $dayBookings = $day['bookings'] ?? collect();
+                                                        $isCurrentMonth = $day['isCurrentMonth'];
+                                                        $isToday = $day['isToday'];
+                                                    @endphp
+                                                    <td class="position-relative p-2 align-top
+                                                        {{ !$isCurrentMonth ? 'text-muted bg-light' : '' }}
+                                                        {{ $isToday ? 'bg-primary bg-opacity-10' : '' }}">
+                                                        
+                                                        <!-- Day Number -->
+                                                        <div class="d-flex justify-content-between align-items-start mb-1">
+                                                            <span class="fw-semibold {{ $isToday ? 'text-primary' : '' }}" style="font-size: 0.8rem;">
+                                                                {{ $day['dayNumber'] }}
+                                                            </span>
+                                                            @if($isToday)
+                                                                <span class="badge bg-primary" style="font-size: 0.6rem;">Today</span>
+                                                            @endif
+                                                        </div>
+                                                        
+                                                        <!-- Bookings for this day -->
+                                                        @if($dayBookings->count() > 0)
+                                                            <div class="calendar-events">
+                                                                @foreach($dayBookings->take(2) as $booking)
+                                                                    @php
+                                                                        $statusColors = [
+                                                                            'pending' => 'warning',
+                                                                            'approved' => 'success',
+                                                                            'rejected' => 'danger',
+                                                                            'cancelled' => 'secondary'
+                                                                        ];
+                                                                        $color = $statusColors[$booking->status] ?? 'secondary';
+                                                                    @endphp
+                                                                    <div class="calendar-event mb-1" style="font-size: 0.65rem;">
+                                                                        <div class="bg-{{ $color }} bg-opacity-25 border border-{{ $color }} rounded px-1 py-0">
+                                                                            <div class="text-{{ $color == 'warning' ? 'dark' : $color }}">
+                                                                                {{ \Carbon\Carbon::parse($booking->time_from)->format('H:i') }}
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                @endforeach
+                                                                
+                                                                @if($dayBookings->count() > 2)
+                                                                    <div class="small text-muted" style="font-size: 0.6rem;">
+                                                                        +{{ $dayBookings->count() - 2 }}
+                                                                    </div>
+                                                                @endif
+                                                            </div>
+                                                        @endif
+                                                    </td>
+                                                @endforeach
+                                            </tr>
+                                        @endforeach
+                                    @else
+                                        <tr>
+                                            <td colspan="7" class="text-center py-4">
+                                                <i class="fas fa-calendar text-muted fs-3"></i>
+                                                <div class="mt-2">
+                                                    <h6 class="text-muted">Calendar Loading...</h6>
+                                                    <p class="text-muted small">Your bookings calendar will appear here</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endif
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Calendar Legend -->
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-center gap-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-warning bg-opacity-25 border border-warning rounded me-1" style="width: 12px; height: 12px;"></div>
+                                        <span class="small">Pending</span>
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-success bg-opacity-25 border border-success rounded me-1" style="width: 12px; height: 12px;"></div>
+                                        <span class="small">Approved</span>
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-danger bg-opacity-25 border border-danger rounded me-1" style="width: 12px; height: 12px;"></div>
+                                        <span class="small">Rejected</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
         
         <!-- Upcoming Bookings & Quick Actions -->
         <div class="col-lg-4">
@@ -222,5 +270,4 @@
         </div>
     </div>
 </div>
-    
-    
+</div>
