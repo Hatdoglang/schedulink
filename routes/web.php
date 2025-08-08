@@ -12,20 +12,32 @@ use App\Models\AssetType;
 use App\Models\Booking;
 
 // Livewire Components
+use App\Livewire\Admin\Dashboard as AdminDashboard;
 use App\Livewire\AdminStaff\Dashboard as AdminStaffDashboard;
 use App\Livewire\AdminStaff\BookingManagement as AdminStaffBookingManagement;
-
 use App\Livewire\Approver\Dashboard as ApproverDashboard;
 use App\Livewire\Approver\BookingManagement;
 use App\Livewire\Approver\VehicleBookingManagement;
+use App\Livewire\Admin\AccountManagement;
+use App\Livewire\Admin\OrganizationManagement;
+use App\Livewire\Admin\AssetManagement;
+
+
 
 // ✅ Redirect root URL to login
 Route::redirect('/', '/login');
 
+// ✅ Booking approval POST for testing
+Route::post('/approver/booking/{id}/approve', [BookingManagement::class, 'approve'])
+    ->middleware('auth');
+// ✅ Fallback route
+Route::fallback(function () {
+    return redirect('/login');
+});
 // ✅ Logout
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
-// ✅ Calendar view route
+// ✅ Booking calendar view (public-facing)
 Route::get('/calendar', function () {
     $users = User::select('id', 'first_name', 'last_name')->get();
     $assetTypes = AssetType::select('id', 'name')->get();
@@ -42,16 +54,15 @@ Route::post('/bookings/reject', [ApprovalController::class, 'reject'])->name('bo
 // ✅ Conference room view (Requester)
 Route::get('/conference-room', [ConferenceRoomController::class, 'index'])->name('requester.conference-room');
 
-// ✅ Authenticated and verified routes
+// ✅ Authenticated + verified routes
 Route::middleware(['auth', 'verified'])->group(function () {
 
-    // ✅ Dashboard role-based redirect
+    // ✅ Dashboard route with role-based redirection
     Route::get('/dashboard', function () {
-        $redirectUrl = \App\Services\RoleRedirectService::getRedirectUrl();
-        return redirect($redirectUrl);
+        return redirect(\App\Services\RoleRedirectService::getRedirectUrl());
     })->name('dashboard');
 
-    // ✅ Profile Management
+    // ✅ Profile routes
     Route::view('/profile', 'profile')->name('profile');
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -67,15 +78,31 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // ✅ Admin Staff Routes
     Route::prefix('admin-staff')->name('admin-staff.')->group(function () {
         Route::get('/dashboard', AdminStaffDashboard::class)->name('dashboard');
-
-        // Ready for future features:
         Route::get('/bookings', AdminStaffBookingManagement::class)->name('booking-management');
-        // ✅ This is the important route:
-        Route::get('/bookings/{booking}/print', [BookingController::class, 'print'])
-            ->name('bookings.print');
-
-
+        Route::get('/bookings/{booking}/print', [BookingController::class, 'print'])->name('bookings.print');
     });
+
+    // ✅ Admin Routes
+    Route::prefix('admin')->name('admin.')->group(function () {
+        Route::get('/dashboard', AdminDashboard::class)->name('dashboard');
+        Route::get('/account-management', AccountManagement::class)->name('account-management');
+
+        // ✅ Organization Management
+        Route::get('/organization', OrganizationManagement::class)->name('organization');
+
+        // ✅ Asset Management
+        Route::get('/assets', AssetManagement::class)->name('assets');
+
+        // ✅ Driver Management
+        Route::get('/driver-management', \App\Livewire\Admin\DriverManagement::class)->name('driver-management');
+    });
+
+
+    // ✅ Requester Routes
+    Route::prefix('requester')->name('requester.')->group(function () {
+        Route::get('/dashboard', \App\Livewire\Requester\Dashboard::class)->name('dashboard');
+    });
+
 });
 
 // ✅ API route for FullCalendar background events
@@ -96,7 +123,7 @@ Route::get('/api/bookings/dates', function () {
     );
 });
 
-// ✅ Debug/testing routes (optional)
+// ✅ Debug/test routes
 Route::get('/debug-role', function () {
     if (!auth()->check())
         return redirect('/login');
@@ -131,10 +158,6 @@ Route::get('/test-profile', function () {
     ];
 })->middleware('auth')->name('test.profile');
 
-// ✅ Fallback to login if route doesn't exist
-Route::fallback(function () {
-    return redirect('/login');
-});
 
-// ✅ Include Breeze/Jetstream auth routes
+// ✅ Breeze/Jetstream auth routes
 require __DIR__ . '/auth.php';

@@ -28,7 +28,8 @@
 
                 <div class="modal-body">
                     <!-- Step 1 -->
-                    <div x-data="{ selectedAssetType: '', vehicleTypeId: {{ $assetTypes->firstWhere('name', 'Vehicle')->id ?? 'null' }} }" x-show="!showCalendar && !showConfirm">
+                    <div x-data="{ selectedAssetType: '', vehicleTypeId: {{ $assetTypes->firstWhere('name', 'Vehicle')->id ?? 'null' }} }"
+                        x-show="!showCalendar && !showConfirm">
 
                         <!-- Asset Type -->
                         <div class="mb-3">
@@ -36,7 +37,7 @@
                             <select name="asset_type_id" class="form-select" required x-model="selectedAssetType">
                                 <option value="">-- Select --</option>
                                 @foreach ($assetTypes as $type)
-                                    <option value="{{ $type->id }}">{{ $type->name }}</option>
+                                <option value="{{ $type->id }}">{{ $type->name }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -66,12 +67,13 @@
                             <div>
                                 <div class="mb-3">
                                     <label>Conference Room</label>
-                                    <select name="asset_detail_id" id="asset_detail_id" class="form-select" required onchange="updateVenue()">
+                                    <select name="asset_detail_id" id="asset_detail_id" class="form-select" required
+                                        onchange="updateVenue()">
                                         <option value="">-- Select --</option>
-                                        @foreach ($assetDetails as $detail)
-                                            <option value="{{ $detail->id }}" data-location="{{ $detail->location }}">
-                                                {{ $detail->asset_name }}
-                                            </option>
+                                        @foreach ($assetDetails->where('asset_type_id', 1) as $detail)
+                                        <option value="{{ $detail->id }}" data-location="{{ $detail->location }}">
+                                            {{ $detail->asset_name }}
+                                        </option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -80,10 +82,10 @@
                                     <label>Venue</label>
                                     <select name="destination" id="destination" class="form-select" required>
                                         <option value="">-- Select Venue --</option>
-                                        @foreach ($assetDetails as $detail)
-                                            <option value="{{ $detail->id }}" data-location="{{ $detail->location }}">
-                                                {{ $detail->location }}
-                                            </option>
+                                        @foreach ($assetDetails->where('asset_type_id', 1) as $detail)
+                                        <option value="{{ $detail->location }}">
+                                            {{ $detail->location }}
+                                        </option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -143,43 +145,84 @@
 
                             {{-- All Day Checkbox --}}
                             <div class="form-check mb-2">
-                                <input class="form-check-input time-slot-radio" type="radio" name="time_slot" data-all-day="true" id="slot_all_day">
+                                <input class="form-check-input time-slot-radio" type="radio" name="time_slot"
+                                    data-all-day="true" id="slot_all_day">
                                 <label class="form-check-label" for="slot_all_day">All Day</label>
                             </div>
 
-                            {{-- Time Slot Options --}}
                             @php
-                                $start = \Carbon\Carbon::createFromTime(8, 0);
-                                $end = \Carbon\Carbon::createFromTime(17, 0);
-                                $interval = 30;
-                                $slots = [];
+                            use Carbon\Carbon;
 
-                                while ($start < $end) {
-                                    $from = $start->copy();
-                                    $to = $from->copy()->addMinutes($interval);
-                                    $slots[] = [$from->format('H:i'), $to->format('H:i')];
-                                    $start->addMinutes($interval);
+                            $start = Carbon::createFromTime(8, 0); // 8:00 AM
+                            $end = Carbon::createFromTime(17, 0); // 5:00 PM
+
+                            $durations = [30, 60, 120, 180, 240, 300, 360, 420, 480, 540]; // in minutes
+                            $slotsByDuration = [];
+
+                            foreach ($durations as $duration) {
+                            $tempStart = $start->copy();
+                            while ($tempStart->copy()->addMinutes($duration) <= $end) { $from=$tempStart->copy();
+                                $to = $from->copy()->addMinutes($duration);
+                                $slotsByDuration[$duration][] = [
+                                'from' => $from->format('H:i'),
+                                'to' => $to->format('H:i'),
+                                ];
+                                $tempStart->addMinutes(30); // step every 30 mins for overlapping options
                                 }
-                            @endphp
+                                }
+                                @endphp
 
-                            <div style="max-height: 280px; overflow-y: auto;">
-                                @foreach ($slots as $i => [$from, $to])
-                                    <div class="form-check mb-2">
+                                {{-- Search Filter --}}
+                                <div class="mb-2">
+                                    <input type="text" id="timeSlotSearch" class="form-control"
+                                        placeholder="Search time (e.g. 9:00 AM)">
+                                </div>
+
+                                <div style="max-height: 280px; overflow-y: auto;" id="timeSlotContainer">
+                                    @foreach ($slotsByDuration as $duration => $slots)
+                                    <h6 class="text-muted mt-3">{{ $duration >= 60 ? ($duration/60) . ' hour' .
+                                        ($duration >= 120 ? 's' : '') :
+                                        $duration . ' mins' }}</h6>
+                                    @foreach ($slots as $i => $slot)
+                                    @php
+                                    $fromFormatted = Carbon::createFromFormat('H:i', $slot['from'])->format('g:i A');
+                                    $toFormatted = Carbon::createFromFormat('H:i', $slot['to'])->format('g:i A');
+                                    $label = "$fromFormatted - $toFormatted";
+                                    @endphp
+                                    <div class="form-check mb-2 time-slot-option">
                                         <input class="form-check-input time-slot-radio" type="radio" name="time_slot"
-                                            value="{{ $from }}-{{ $to }}" id="slot{{ $i }}">
-                                        <label class="form-check-label" for="slot{{ $i }}">
-                                            {{ \Carbon\Carbon::createFromFormat('H:i', $from)->format('g:i A') }} -
-                                            {{ \Carbon\Carbon::createFromFormat('H:i', $to)->format('g:i A') }}
+                                            value="{{ $slot['from'] }}-{{ $slot['to'] }}"
+                                            id="slot_{{ $duration }}_{{ $i }}">
+                                        <label class="form-check-label" for="slot_{{ $duration }}_{{ $i }}">
+                                            {{ $label }}
                                         </label>
                                     </div>
-                                @endforeach
-                            </div>
+                                    @endforeach
+                                    @endforeach
+                                </div>
+
+                                {{-- JavaScript for Live Search --}}
+                                @push('scripts')
+                                <script>
+                                    document.getElementById('timeSlotSearch').addEventListener('input', function () {
+                                    const search = this.value.toLowerCase();
+                                    const options = document.querySelectorAll('#timeSlotContainer .time-slot-option');
+                            
+                                    options.forEach(option => {
+                                        const label = option.querySelector('label').textContent.toLowerCase();
+                                        option.style.display = label.includes(search) ? '' : 'none';
+                                    });
+                                });
+                                </script>
+                                @endpush
                         </div>
 
 
                         <div class="col-md-12 mt-3 d-flex justify-content-end">
-                            <button type="button" class="btn btn-outline-secondary me-2" @click="showCalendar = false">Back</button>
-                            <button type="button" class="btn btn-outline-custom" @click="showConfirm = true; updateSummary()">Next</button>
+                            <button type="button" class="btn btn-outline-secondary me-2"
+                                @click="showCalendar = false">Back</button>
+                            <button type="button" class="btn btn-outline-custom"
+                                @click="showConfirm = true; updateSummary()">Next</button>
                         </div>
                     </div>
 
@@ -193,8 +236,10 @@
                         <div class="col-md-3 text-center border-end">
                             <div class="border rounded p-3 mb-3 bg-light">
                                 <h6 class="text-secondary fw-bold mb-2">User Info</h6>
-                                <p class="mb-1"><strong>Name:</strong> {{ auth()->user()->first_name }} {{ auth()->user()->last_name }}</p>
-                                <p class="mb-0"><strong>Department:</strong> {{ auth()->user()->department->name ?? 'N/A' }}</p>
+                                <p class="mb-1"><strong>Name:</strong> {{ auth()->user()->first_name }} {{
+                                    auth()->user()->last_name }}</p>
+                                <p class="mb-0"><strong>Department:</strong> {{ auth()->user()->department->name ??
+                                    'N/A' }}</p>
                             </div>
                         </div>
 
@@ -202,9 +247,12 @@
                         <div class="col-md-6">
                             <h6 class="mb-3 text-secondary">Reservation Summary</h6>
                             <ul class="list-group mb-3">
-                                <li class="list-group-item text-muted"><strong>Purpose:</strong> <span id="confirm_purpose"></span></li>
-                                <li class="list-group-item text-muted"><strong>Date:</strong> <span id="confirm_date"></span></li>
-                                <li class="list-group-item text-muted"><strong>Time:</strong> <span id="confirm_time"></span></li>
+                                <li class="list-group-item text-muted"><strong>Purpose:</strong> <span
+                                        id="confirm_purpose"></span></li>
+                                <li class="list-group-item text-muted"><strong>Date:</strong> <span
+                                        id="confirm_date"></span></li>
+                                <li class="list-group-item text-muted"><strong>Time:</strong> <span
+                                        id="confirm_time"></span></li>
                             </ul>
 
                             <div class="mb-3">
@@ -216,8 +264,10 @@
                                 <label class="text-secondary">Add Guests (Optional)</label>
                                 <div id="guestInputs">
                                     <div class="input-group mb-2">
-                                        <input type="email" name="guests[]" class="form-control" placeholder="guest@example.com">
-                                        <button class="btn btn-outline-secondary" type="button" onclick="addGuestInput()">+</button>
+                                        <input type="email" name="guests[]" class="form-control"
+                                            placeholder="guest@example.com">
+                                        <button class="btn btn-outline-secondary" type="button"
+                                            onclick="addGuestInput()">+</button>
                                     </div>
                                 </div>
                             </div>
@@ -229,7 +279,8 @@
                                 <h6 class="text-secondary">Ready to Submit</h6>
                                 <p class="text-muted">Review your details before submitting.</p>
                                 <div class="d-grid gap-2">
-                                    <button type="button" class="btn btn-outline-secondary" @click="showConfirm = false">Back</button>
+                                    <button type="button" class="btn btn-outline-secondary"
+                                        @click="showConfirm = false">Back</button>
                                     <button type="submit" class="btn btn-outline-custom">Submit Reservation</button>
                                 </div>
                             </div>

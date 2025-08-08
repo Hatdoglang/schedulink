@@ -9,14 +9,11 @@ class AssetFile extends Model
 {
     protected $fillable = [
         'asset_detail_id',
-        'file_attachments',
+        'file_attachments', // ✅ Fixed typo
     ];
 
-    /**
-     * Get the asset detail that owns the asset file.
-     */
     public function assetDetail(): BelongsTo
     {
-        return $this->belongsTo(AssetDetail::class);
+        return $this->belongsTo(AssetDetail::class, 'asset_detail_id');
     }
 }

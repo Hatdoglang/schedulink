@@ -10,6 +10,11 @@
             </div>
 
             <div class="modal-body">
+
+                {{-- Inline Vehicle Allocation Panel --}}
+                @include('livewire.admin-staff.layouts.allocate-modal')
+
+                {{-- Booking Details Content --}}
                 <div class="row g-4">
                     <!-- Left Column -->
                     <div class="col-md-4">
@@ -50,7 +55,20 @@
                     <!-- Center Column -->
                     <div class="col-md-4 border-start">
                         <h6 class="fw-bold mb-3">Vehicle Information</h6>
-                        @php $vehicle = $selectedBooking->vehicleAssignment?->assetDetail; @endphp
+                        @php
+                        $vehicle = $selectedBooking->vehicleAssignment?->assetDetail;
+                        $image = $vehicle?->files?->first()?->file_attachments;
+                        @endphp
+
+                        {{-- Vehicle Image --}}
+                        @if ($image)
+                        <div class="mb-3 text-center">
+                            <img src="{{ asset('storage/' . $image) }}" alt="Vehicle Image"
+                                class="img-fluid rounded shadow-sm" style="max-height: 200px;">
+                        </div>
+                        @endif
+
+                        {{-- Vehicle Details --}}
                         <div class="mb-2 row"><label class="col-5 fw-semibold">Name:</label>
                             <div class="col-7">{{ $vehicle->asset_name ?? '—' }}</div>
                         </div>
@@ -146,22 +164,39 @@
                 </div>
 
                 <div class="modal-footer justify-content-end">
-                    <button class="btn btn-secondary" onclick="showVehicleModal()">
-                        Allocate Vehicle
-                    </button>
+                    <button class="btn btn-secondary" onclick="showInlineVehicleForm()"
+                        style="background-color: #172736; color: white;">Allocate Vehicle</button>
+                    <button class="btn btn-success" onclick="doneAndReload()"
+                        style="background-color: #172736; color: white;">Done</button>
                 </div>
-                @else
-                <div class="modal-body">
-                    <p>Loading details...</p>
-                </div>
-                @endif
             </div>
+
+            @else
+            <div class="modal-body">
+                <p>Loading details...</p>
+            </div>
+            @endif
         </div>
     </div>
+
+    @push('scripts')
     <script>
-        function showVehicleModal() {
-            const modalEl = document.getElementById("vehicleAllocationModal");
-            const modal = new bootstrap.Modal(modalEl);
-            modal.show();
+        window.vehicles = @json($vehicles);
+    
+        function doneAndReload() {
+            Swal.fire({
+                icon: 'success',
+                title: 'All Set!',
+                text: 'Booking details confirmed.',
+                confirmButtonColor: '#172736',
+                confirmButtonText: 'Close',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    location.reload();
+                }
+            });
         }
     </script>
+    @endpush
+
+</div>

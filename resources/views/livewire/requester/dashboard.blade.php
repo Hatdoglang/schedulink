@@ -1,6 +1,5 @@
 <!-- Make sure Alpine.js is loaded -->
-<script src="//unpkg.com/alpinejs" defer></script>
-
+<link rel="stylesheet" href="{{ asset('css/tabs.css') }}">
 <div x-data="{ activeTab: 'calendar' }" class="flex min-h-screen bg-gray-100 pt-16">
 
     <!-- Sidebar -->
@@ -11,25 +10,60 @@
     <!-- Main Content -->
     <div class="flex-1 flex flex-col ml-[15vw]">
         <!-- Page Content -->
+        <livewire:requester.notification.notification-header />
         <main class="flex-1 p-6 overflow-auto">
             <!-- Notification Header -->
-            <livewire:requester.notification.notification-header />
 
-            <!-- Navigation Tabs -->
+            <!-- Navigation Tabs + Filter Dropdown -->
+            <!-- Navigation Tabs + Filter Dropdown -->
             <div class="mb-6">
-                <nav class="flex space-x-4 border-b border-gray-300 pb-2">
-                    <a href="#" @click.prevent="activeTab = 'calendar'"
-                        :class="activeTab === 'calendar' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-gray-800'"
-                        class="px-3 py-2 text-sm font-medium">
-                        View Calendar
-                    </a>
-                    <a href="#" @click.prevent="activeTab = 'conference'"
-                        :class="activeTab === 'conference' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:text-gray-800'"
-                        class="px-3 py-2 text-sm font-medium">
-                        Conference Room
-                    </a>
-                </nav>
+                
+                <!-- Tabs Row -->
+                <div class="flex justify-start gap-4 mb-4">
+                    <nav class="tab-buttons flex gap-4">
+                        <a href="#" @click.prevent="activeTab = 'calendar'"
+                            :class="activeTab === 'calendar' ? 'tab-button active' : 'tab-button'">
+                            View Calendar
+                        </a>
+                        <a href="#" @click.prevent="activeTab = 'conference'"
+                            :class="activeTab === 'conference' ? 'tab-button active' : 'tab-button'">
+                            Conference Room
+                        </a>
+                    </nav>
+                </div>
+
+                <!-- Filter Centered -->
+                <div class="d-flex flex-column align-items-center text-center" style="margin-top: -70px;">
+                    Filter by Asset or Driver Name
+                    </label>
+
+                    <select id="assetFilter" class="w-64 rounded-md border-gray-300 shadow-sm text-center"
+                        onchange="filterCalendarByAsset()">
+                        <option value="">All</option>
+
+                        @php
+                        use App\Models\Booking;
+                        use App\Models\Driver;
+
+                        $assetNames = Booking::whereNotNull('asset_name')->distinct()->pluck('asset_name')->sort();
+                        $driverNames = Driver::where('is_active', true)->pluck('name')->sort();
+                        @endphp
+
+                        <optgroup label="Assets">
+                            @foreach ($assetNames as $name)
+                            <option value="{{ $name }}">{{ $name }}</option>
+                            @endforeach
+                        </optgroup>
+
+                        <optgroup label="Drivers">
+                            @foreach ($driverNames as $name)
+                            <option value="{{ $name }}">{{ $name }}</option>
+                            @endforeach
+                        </optgroup>
+                    </select>
+                </div>
             </div>
+
 
             <!-- View Calendar Tab -->
             <div x-show="activeTab === 'calendar'" x-cloak>
@@ -37,55 +71,14 @@
                     <div class="flex items-center justify-between mb-6">
                         <h2 class="text-xl font-semibold text-gray-800">Your Booking Calendar</h2>
                     </div>
+
+
+
+                    <!-- 📅 Calendar -->
                     <div class="calendar-container">
                         @livewire('requester.calendar', ['compactMode' => true])
                     </div>
                 </div>
-
-                <!-- Recent Bookings Section -->
-                @if ($recentBookings && count($recentBookings) > 0)
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <h2 class="text-xl font-semibold text-gray-800 mb-4">Recent Bookings</h2>
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Asset</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
-                                    @foreach ($recentBookings as $booking)
-                                        <tr>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                {{ $booking->assetDetail->name ?? 'N/A' }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                {{ \Carbon\Carbon::parse($booking->scheduled_date)->format('M j, Y') }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                {{ \Carbon\Carbon::parse($booking->time_from)->format('g:i A') }} -
-                                                {{ \Carbon\Carbon::parse($booking->time_to)->format('g:i A') }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                <span
-                                                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-                                                    @if ($booking->status === 'approved') bg-green-100 text-green-800
-                                                    @elseif($booking->status === 'pending') bg-yellow-100 text-yellow-800
-                                                    @elseif($booking->status === 'rejected') bg-red-100 text-red-800
-                                                    @else bg-gray-100 text-gray-800 @endif">
-                                                    {{ ucfirst($booking->status) }}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                @endif
             </div>
 
             <!-- Conference Room Tab -->

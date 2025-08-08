@@ -23,33 +23,22 @@ class AssetDetail extends Model
         'number_of_seats' => 'integer',
     ];
 
-    /**
-     * Get the asset type that owns the asset detail.
-     */
     public function assetType(): BelongsTo
     {
         return $this->belongsTo(AssetType::class);
     }
 
-    /**
-     * Get the asset files for the asset detail.
-     */
-    public function assetFiles(): HasMany
+    // ✅ Renamed to "files" for simplicity and to match Livewire view
+    public function files(): HasMany
     {
-        return $this->hasMany(AssetFile::class);
+        return $this->hasMany(AssetFile::class, 'asset_detail_id');
     }
 
-    /**
-     * Get the bookings for the asset detail.
-     */
     public function bookings(): HasMany
     {
         return $this->hasMany(Booking::class);
     }
 
-    /**
-     * Get the vehicle driver assignments for the asset detail.
-     */
     public function vehicleDriverAssignments(): HasMany
     {
         return $this->hasMany(VehicleDriverAssignment::class);

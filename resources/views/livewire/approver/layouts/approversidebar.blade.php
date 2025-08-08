@@ -38,7 +38,7 @@
 
 
 
-            <li class="nav-item mb-1">
+            {{-- <li class="nav-item mb-1">
                 <a href="#" class="nav-link d-flex align-items-center gap-2 rounded px-3 py-2 text-dark hover-bg-light">
                     <i class="bi bi-person-badge"></i> Client Management
                 </a>
@@ -48,7 +48,7 @@
                 <a href="#" class="nav-link d-flex align-items-center gap-2 rounded px-3 py-2 text-dark hover-bg-light">
                     <i class="bi bi-chat-dots"></i> Feedback
                 </a>
-            </li>
+            </li> --}}
 
         </ul>
     </nav>

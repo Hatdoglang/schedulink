@@ -333,7 +333,7 @@ function ajaxSubmitBooking(e) {
 
                 Swal.fire({
                     icon: "success",
-                    title: "Booked!",
+                    title: "Your request is submitted!",
                     html: `
                     <div style="display: flex; justify-content: center; gap: 10px; font-size: 12px; margin-bottom: 8px;">
                         <span><i class="fa fa-calendar"></i> <strong>${selectedDate}</strong></span>

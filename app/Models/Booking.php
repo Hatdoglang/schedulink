@@ -42,25 +42,55 @@ class Booking extends Model
      |--------------------------------------------------------------------------
      */
 
+    // public function user()
+    // {
+    //     return $this->belongsTo(\App\Models\User::class);
+    // }
+
     public function user()
     {
-        return $this->belongsTo(\App\Models\User::class);
+        return $this->belongsTo(User::class);
     }
+
+    // public function assetType()
+    // {
+    //     return $this->belongsTo(\App\Models\AssetType::class);
+    // }
 
     public function assetType()
     {
-        return $this->belongsTo(\App\Models\AssetType::class);
+        return $this->belongsTo(AssetType::class);
     }
+
+    // public function assetDetail()
+    // {
+    //     return $this->belongsTo(\App\Models\AssetDetail::class);
+    // }
 
     public function assetDetail()
     {
-        return $this->belongsTo(\App\Models\AssetDetail::class);
+        return $this->belongsTo(AssetDetail::class);
+    }
+
+    public function vehicleDriverAssignments()
+    {
+        return $this->hasMany(\App\Models\VehicleDriverAssignment::class, 'booking_id');
     }
 
     public function bookedGuests()
     {
         return $this->hasMany(BookedGuest::class);
     }
+
+    public function guests()
+    {
+        return $this->hasMany(BookedGuest::class);
+    }
+    public function vehicleAssignments()
+    {
+        return $this->hasMany(VehicleDriverAssignment::class);
+    }
+
 
     public function approvalLogs()
     {
